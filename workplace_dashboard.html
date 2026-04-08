@@ -1,1267 +1,1373 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Workplace Experience — Dashboard de Tarefas</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-:root{
-  --nu-purple:#820AD1;--nu-purple-dark:#6A0AB5;--nu-purple-deeper:#3D0066;
-  --nu-bg:#0D001A;--nu-surface:#1A0533;--nu-surface2:#2B0A47;
-  --nu-card:#1F0740;--nu-border:rgba(130,10,209,0.2);
-  --nu-text:#F4EAFA;--nu-text-sec:#B08FD4;--nu-text-muted:#7B5EA0;
-  --nu-green:#00C853;--nu-yellow:#FFD600;--nu-red:#FF4C4C;--nu-blue:#6EC1E4;
-  --nu-orange:#FF9100;
-  --radius:10px;
-}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Nunito",sans-serif;background:var(--nu-bg);color:var(--nu-text);min-height:100vh}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workplace Experience - Dashboard de Tarefas</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-/* HEADER */
-.app-header{
-  background:linear-gradient(135deg,var(--nu-purple-deeper) 0%,var(--nu-purple-dark) 100%);
-  padding:18px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
-  border-bottom:1px solid var(--nu-border);position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);
-}
-.logo{display:flex;align-items:center;gap:12px}
-.logo svg{width:32px;height:32px}
-.app-header h1{font-size:18px;font-weight:700;letter-spacing:-.02em}
-.app-header .subtitle{font-size:12px;color:var(--nu-text-sec);margin-top:1px}
-.header-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      background: #0D001A;
+      color: #F4EAFA;
+      overflow-x: hidden;
+    }
 
-/* TABS */
-.tabs{display:flex;gap:4px;background:rgba(255,255,255,0.06);border-radius:8px;padding:3px}
-.tab{padding:8px 18px;border-radius:6px;border:none;background:transparent;color:var(--nu-text-sec);
-  font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
-.tab:hover{color:var(--nu-text)}
-.tab.active{background:var(--nu-purple);color:#fff}
+    .container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-/* BUTTONS */
-.btn{border:none;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;
-  transition:all .2s;display:flex;align-items:center;gap:6px}
-.btn-primary{background:var(--nu-purple);color:#fff}
-.btn-primary:hover{background:var(--nu-purple-dark);transform:translateY(-1px)}
-.btn-ghost{background:rgba(255,255,255,0.1);color:var(--nu-text);border:1px solid rgba(255,255,255,0.15)}
-.btn-ghost:hover{background:rgba(255,255,255,0.15)}
-.btn:active{transform:scale(.97)}
+    /* Header */
+    .header {
+      background: #820AD1;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
 
-/* STATS */
-.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;padding:20px 28px}
-.stat-card{background:var(--nu-card);border:1px solid var(--nu-border);border-radius:var(--radius);
-  padding:16px 20px;text-align:center;transition:all .25s;position:relative;overflow:hidden}
-.stat-card:hover{border-color:var(--nu-purple);transform:translateY(-2px);box-shadow:0 4px 20px rgba(130,10,209,0.2)}
-.stat-icon{font-size:22px;margin-bottom:4px}
-.stat-val{font-size:30px;font-weight:700;line-height:1.1}
-.stat-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--nu-text-sec);margin-top:4px}
-.stat-pct{font-size:11px;color:var(--nu-text-muted);margin-top:2px}
-.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px}
-.stat-pending::after{background:#B08FD4}.stat-wip::after{background:var(--nu-yellow)}
-.stat-done::after{background:var(--nu-green)}.stat-cancel::after{background:var(--nu-red)}
-.stat-total::after{background:var(--nu-purple)}
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
 
-/* VIEW */
-.view{display:none;padding:0 28px 40px;animation:fadeUp .35s ease}
-.view.active{display:block}
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-/* FILTER BAR */
-.filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
-.filter-bar label{font-size:12px;font-weight:600;color:var(--nu-text-sec)}
-.filter-select{padding:7px 12px;border:1px solid var(--nu-border);border-radius:7px;font-size:12px;
-  background:var(--nu-card);color:var(--nu-text);cursor:pointer;font-family:inherit}
-.filter-select:focus{outline:none;border-color:var(--nu-purple)}
-.filter-select option{background:var(--nu-bg)}
-.filter-tag{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;
-  border:1px solid var(--nu-border);background:transparent;color:var(--nu-text-sec);transition:all .2s}
-.filter-tag.active{background:var(--nu-purple);color:#fff;border-color:var(--nu-purple)}
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
 
-/* KANBAN */
-.kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;min-height:400px}
-.kanban-col{background:var(--nu-surface);border-radius:var(--radius);border:1px solid var(--nu-border);
-  display:flex;flex-direction:column;min-height:300px}
-.kanban-col-header{padding:14px 16px;border-bottom:1px solid var(--nu-border);
-  display:flex;align-items:center;justify-content:space-between}
-.kanban-col-header h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
-.col-cnt{background:rgba(255,255,255,0.08);padding:2px 10px;border-radius:12px;font-size:12px;font-weight:600}
-.col-pending .kanban-col-header{border-top:3px solid #B08FD4}
-.col-wip .kanban-col-header{border-top:3px solid var(--nu-yellow)}
-.col-done .kanban-col-header{border-top:3px solid var(--nu-green)}
-.col-cancel .kanban-col-header{border-top:3px solid var(--nu-red)}
-.kanban-col-body{padding:10px;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
-.kanban-col-body::-webkit-scrollbar{width:4px}
-.kanban-col-body::-webkit-scrollbar-thumb{background:var(--nu-border);border-radius:4px}
-.kanban-empty{text-align:center;color:var(--nu-text-muted);font-size:12px;padding:24px 8px;
-  display:flex;align-items:center;justify-content:center;flex:1}
+    .tabs {
+      display: flex;
+      gap: 24px;
+    }
 
-/* KANBAN CARD */
-.k-card{background:var(--nu-card);border:1px solid var(--nu-border);border-radius:8px;
-  padding:12px 14px;cursor:pointer;transition:all .2s;position:relative}
-.k-card:hover{border-color:var(--nu-purple);box-shadow:0 2px 12px rgba(130,10,209,0.15)}
-.k-card.overdue{border-color:rgba(255,76,76,0.5);animation:pulseRed 2s infinite}
-@keyframes pulseRed{
-  0%,100%{box-shadow:0 0 0 0 rgba(255,76,76,0.0)}
-  50%{box-shadow:0 0 0 4px rgba(255,76,76,0.2)}
-}
-.k-card.warn{border-color:rgba(255,209,0,0.4)}
-.k-title{font-size:13px;font-weight:600;line-height:1.3;margin-bottom:6px;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.k-meta{font-size:11px;color:var(--nu-text-sec);display:flex;flex-direction:column;gap:3px}
-.k-assignee-row{display:flex;align-items:center;justify-content:space-between;margin-top:8px;
-  padding-top:8px;border-top:1px solid rgba(255,255,255,0.04)}
-.k-assignee-name{font-size:11px;font-weight:600;color:var(--nu-purple);
-  background:rgba(130,10,209,0.12);padding:2px 8px;border-radius:4px}
-.k-dl-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px}
-.dl-ok{background:rgba(0,200,83,0.12);color:var(--nu-green)}
-.dl-warn{background:rgba(255,209,0,0.15);color:var(--nu-yellow)}
-.dl-overdue{background:rgba(255,76,76,0.12);color:var(--nu-red)}
-.k-actions{position:absolute;top:8px;right:8px;display:flex;gap:4px;opacity:0;transition:opacity .2s}
-.k-card:hover .k-actions{opacity:1}
-.k-act{width:22px;height:22px;border:none;border-radius:4px;cursor:pointer;font-size:11px;
-  display:flex;align-items:center;justify-content:center;transition:all .15s}
-.k-act-move{background:rgba(130,10,209,0.15);color:var(--nu-purple)}
-.k-act-move:hover{background:var(--nu-purple);color:#fff}
-.k-act-edit{background:rgba(110,193,228,0.12);color:var(--nu-blue)}
-.k-act-edit:hover{background:var(--nu-blue);color:#1d1d1f}
-.k-act-del{background:rgba(255,76,76,0.1);color:var(--nu-red)}
-.k-act-del:hover{background:var(--nu-red);color:#fff}
-.k-slack-badge{font-size:10px;background:rgba(74,21,75,0.4);color:#E8B4FF;
-  padding:2px 7px;border-radius:4px;margin-top:5px;display:inline-flex;align-items:center;gap:4px;width:fit-content}
+    .tab {
+      padding: 8px 0;
+      border: none;
+      background: none;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
 
-/* OVERDUE ALERT BAR */
-.alert-bar{background:rgba(255,76,76,0.1);border:1px solid rgba(255,76,76,0.3);border-radius:8px;
-  padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;font-size:13px;
-  animation:fadeUp .3s ease}
-.alert-bar.hidden{display:none}
+    .tab.active {
+      color: #FFF;
+      border-bottom-color: #FFF;
+    }
 
-/* SLACK PANEL */
-.slack-panel{background:var(--nu-surface);border:1px solid var(--nu-border);border-radius:var(--radius);
-  padding:20px 24px;margin-bottom:20px}
-.slack-panel h3{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:14px}
-.slack-form{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
-.slack-field{display:flex;flex-direction:column;gap:5px}
-.slack-field label{font-size:11px;font-weight:600;color:var(--nu-text-sec)}
-.slack-field input,.slack-field select{padding:8px 12px;border:1px solid var(--nu-border);
-  border-radius:7px;font-size:13px;background:var(--nu-bg);color:var(--nu-text);font-family:inherit;min-width:160px}
-.slack-field input:focus,.slack-field select:focus{outline:none;border-color:var(--nu-purple)}
-.slack-field select option{background:var(--nu-bg)}
-.slack-results{margin-top:16px;display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto}
-.slack-results::-webkit-scrollbar{width:4px}
-.slack-results::-webkit-scrollbar-thumb{background:var(--nu-border);border-radius:4px}
-.slack-msg{background:var(--nu-card);border:1px solid var(--nu-border);border-radius:8px;padding:12px 14px;
-  display:flex;flex-direction:column;gap:8px}
-.slack-msg-header{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.slack-msg-from{font-size:12px;font-weight:600;color:var(--nu-purple)}
-.slack-msg-time{font-size:11px;color:var(--nu-text-muted)}
-.slack-msg-text{font-size:12px;color:var(--nu-text-sec);line-height:1.5;
-  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.slack-msg-text.expanded{-webkit-line-clamp:unset}
-.slack-msg-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.btn-convert{background:var(--nu-purple);color:#fff;border:none;padding:6px 14px;border-radius:6px;
-  font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px}
-.btn-convert:hover{background:var(--nu-purple-dark)}
-.btn-expand{background:transparent;border:1px solid var(--nu-border);color:var(--nu-text-sec);
-  padding:5px 10px;border-radius:5px;font-size:11px;cursor:pointer;transition:all .2s}
-.btn-expand:hover{border-color:var(--nu-text-sec)}
-.ai-extract{background:rgba(130,10,209,0.08);border:1px solid rgba(130,10,209,0.2);border-radius:6px;
-  padding:10px 12px;font-size:12px;display:flex;flex-direction:column;gap:6px}
-.ai-extract-title{font-size:11px;font-weight:700;color:var(--nu-purple);text-transform:uppercase;
-  letter-spacing:.06em;margin-bottom:2px}
-.ai-field-row{display:flex;align-items:center;gap:6px}
-.ai-field-label{font-size:11px;color:var(--nu-text-muted);width:80px;flex-shrink:0}
-.ai-field-input{flex:1;padding:5px 9px;border:1px solid var(--nu-border);border-radius:5px;
-  font-size:12px;background:var(--nu-bg);color:var(--nu-text);font-family:inherit}
-.ai-field-input:focus{outline:none;border-color:var(--nu-purple)}
-.ai-field-input[type=date]{min-width:130px}
-.ai-field-select{flex:1;padding:5px 9px;border:1px solid var(--nu-border);border-radius:5px;
-  font-size:12px;background:var(--nu-bg);color:var(--nu-text);font-family:inherit}
-.ai-field-select:focus{outline:none;border-color:var(--nu-purple)}
-.ai-field-select option{background:var(--nu-bg)}
-.converting-spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);
-  border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.empty-slack{text-align:center;color:var(--nu-text-muted);padding:32px;font-size:13px}
+    .tab:hover {
+      color: #FFF;
+    }
 
-/* CHARTS */
-.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.chart-card{background:var(--nu-card);border:1px solid var(--nu-border);border-radius:var(--radius);padding:20px 24px}
-.chart-card h3{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
-  color:var(--nu-text-sec);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--nu-border)}
-.chart-card.full{grid-column:1/-1}
-.bar-chart{display:flex;flex-direction:column;gap:12px}
-.bar-row{display:flex;align-items:center;gap:12px}
-.bar-name{width:90px;font-size:12px;font-weight:600;text-align:right;flex-shrink:0;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bar-track{flex:1;display:flex;height:26px;border-radius:4px;overflow:hidden;background:rgba(255,255,255,0.04)}
-.bar-seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;transition:width .6s ease}
-.seg-pending{background:#9B6DC6}.seg-wip{background:var(--nu-yellow);color:#1d1d1f}
-.seg-done{background:var(--nu-green)}.seg-cancel{background:var(--nu-red)}
-.bar-total{width:30px;font-size:12px;font-weight:600;text-align:center;color:var(--nu-text-sec)}
-.chart-legend{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap}
-.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--nu-text-sec)}
-.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
-.donut-container{display:flex;align-items:center;justify-content:center;gap:32px;min-height:200px}
-.donut-svg{width:180px;height:180px}
-.donut-legend{display:flex;flex-direction:column;gap:10px}
-.donut-legend-item{display:flex;align-items:center;gap:8px}
-.donut-legend-dot{width:12px;height:12px;border-radius:3px}
-.donut-legend-label{font-size:12px;color:var(--nu-text-sec)}
-.donut-legend-val{font-size:14px;font-weight:700;margin-left:auto}
-.time-table{width:100%;border-collapse:collapse;font-size:12px}
-.time-table th{text-align:left;padding:8px 12px;border-bottom:1px solid var(--nu-border);
-  color:var(--nu-text-sec);font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:11px}
-.time-table td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.03)}
-.time-table tr:hover td{background:rgba(130,10,209,0.05)}
-.days-cell{font-weight:700}
-.days-good{color:var(--nu-green)}.days-mid{color:var(--nu-yellow)}.days-bad{color:var(--nu-red)}
+    .header-right {
+      display: flex;
+      gap: 12px;
+    }
 
-/* MODAL */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);
-  z-index:300;justify-content:center;align-items:center}
-.modal-bg.show{display:flex}
-.modal{background:var(--nu-surface);border:1px solid var(--nu-border);border-radius:14px;
-  padding:28px 32px;width:480px;max-width:94vw;animation:modalIn .3s ease;max-height:90vh;overflow-y:auto}
-@keyframes modalIn{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
-.modal h2{font-size:18px;font-weight:700;margin-bottom:20px}
-.modal-source{background:rgba(130,10,209,0.08);border:1px solid rgba(130,10,209,0.2);border-radius:6px;
-  padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--nu-text-sec);line-height:1.5}
-.modal-source strong{color:var(--nu-purple);display:block;margin-bottom:3px;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
-.fg{margin-bottom:14px}
-.fg label{display:block;font-size:12px;font-weight:600;color:var(--nu-text-sec);margin-bottom:5px}
-.fg input,.fg textarea,.fg select{width:100%;padding:9px 12px;border:1px solid var(--nu-border);
-  border-radius:7px;font-size:13px;font-family:inherit;color:var(--nu-text);background:var(--nu-bg);transition:all .2s}
-.fg input:focus,.fg textarea:focus,.fg select:focus{outline:none;border-color:var(--nu-purple);
-  box-shadow:0 0 0 3px rgba(130,10,209,0.2)}
-.fg textarea{resize:vertical;min-height:56px}
-.fg select option{background:var(--nu-bg);color:var(--nu-text)}
-.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
-.btn-sec{padding:9px 18px;border-radius:7px;border:1px solid var(--nu-border);background:transparent;
-  color:var(--nu-text-sec);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
-.btn-sec:hover{border-color:var(--nu-text-sec);color:var(--nu-text)}
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
 
-/* DETAIL MODAL */
-.detail-row{display:flex;gap:8px;margin-bottom:10px}
-.detail-label{font-size:11px;font-weight:700;color:var(--nu-text-muted);text-transform:uppercase;
-  letter-spacing:.06em;width:90px;flex-shrink:0;padding-top:2px}
-.detail-val{font-size:13px;color:var(--nu-text);flex:1}
+    .btn-primary {
+      background: rgba(255, 255, 255, 0.2);
+      color: #FFF;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
 
-/* CONTEXT MENU */
-.ctx-menu{position:fixed;background:var(--nu-surface);border:1px solid var(--nu-border);
-  border-radius:8px;padding:4px;z-index:400;box-shadow:0 8px 32px rgba(0,0,0,0.4);
-  animation:fadeUp .15s ease;display:none}
-.ctx-menu.show{display:block}
-.ctx-item{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:5px;
-  font-size:12px;font-weight:500;cursor:pointer;transition:background .15s;white-space:nowrap}
-.ctx-item:hover{background:rgba(130,10,209,0.12)}
-.ctx-dot{width:8px;height:8px;border-radius:50%}
+    .btn-primary:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
 
-/* TOAST */
-.toast{position:fixed;bottom:24px;right:24px;background:var(--nu-surface2);border:1px solid var(--nu-border);
-  border-radius:10px;padding:12px 18px;font-size:13px;font-weight:500;z-index:500;
-  animation:toastIn .3s ease;box-shadow:0 8px 24px rgba(0,0,0,0.4);display:flex;align-items:center;gap:8px}
-.toast.hidden{display:none}
-@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+    .btn-secondary {
+      background: rgba(0, 0, 0, 0.2);
+      color: #FFF;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
 
-@media(max-width:900px){
-  .stats-row{grid-template-columns:repeat(2,1fr)}
-  .kanban{grid-template-columns:repeat(2,1fr)}
-  .charts-grid{grid-template-columns:1fr}
-}
-@media(max-width:600px){
-  .stats-row{grid-template-columns:1fr 1fr}
-  .kanban{grid-template-columns:1fr}
-  .app-header{padding:14px 16px}
-  .view{padding:0 14px 32px}
-  .stats-row{padding:16px 14px}
-}
-</style>
+    .btn-secondary:hover {
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    /* Main Content */
+    .main {
+      flex: 1;
+      padding: 24px;
+      max-width: 1600px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Stats Row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: #1A0533;
+      border: 1px solid rgba(130, 10, 209, 0.2);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #820AD1;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: rgba(244, 234, 250, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Filters */
+    .filters {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .filter-label {
+      font-size: 12px;
+      color: rgba(244, 234, 250, 0.6);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    select.filter-select {
+      background: #1A0533;
+      color: #F4EAFA;
+      border: 1px solid rgba(130, 10, 209, 0.2);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    select.filter-select:focus {
+      outline: none;
+      border-color: #820AD1;
+    }
+
+    select.filter-select option {
+      background: #1A0533;
+      color: #F4EAFA;
+    }
+
+    .priority-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .priority-btn {
+      padding: 6px 12px;
+      border: 1px solid rgba(130, 10, 209, 0.3);
+      background: transparent;
+      color: rgba(244, 234, 250, 0.6);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .priority-btn.active {
+      background: #820AD1;
+      color: #FFF;
+      border-color: #820AD1;
+    }
+
+    .priority-btn:hover {
+      border-color: #820AD1;
+    }
+
+    /* Kanban View */
+    .kanban-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      display: none;
+    }
+
+    .kanban-container.active {
+      display: grid;
+    }
+
+    .kanban-column {
+      background: #1A0533;
+      border: 1px solid rgba(130, 10, 209, 0.2);
+      border-radius: 8px;
+      padding: 16px;
+      min-height: 500px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .kanban-column-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: rgba(244, 234, 250, 0.6);
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(130, 10, 209, 0.15);
+    }
+
+    .kanban-cards {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .kanban-card {
+      background: #1F0740;
+      border: 1px solid rgba(130, 10, 209, 0.2);
+      border-radius: 6px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .kanban-card:hover {
+      border-color: #820AD1;
+      box-shadow: 0 4px 12px rgba(130, 10, 209, 0.15);
+    }
+
+    .kanban-card.overdue {
+      border: 2px solid #FF4C4C;
+      animation: pulse-red 2s infinite;
+    }
+
+    @keyframes pulse-red {
+      0%, 100% { border-color: #FF4C4C; box-shadow: 0 0 0 0 rgba(255, 76, 76, 0.3); }
+      50% { border-color: #FF6B6B; box-shadow: 0 0 0 4px rgba(255, 76, 76, 0.1); }
+    }
+
+    .kanban-card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #F4EAFA;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .kanban-card-info {
+      font-size: 11px;
+      color: rgba(244, 234, 250, 0.5);
+      margin-bottom: 8px;
+    }
+
+    .kanban-card-meta {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .badge-priority-alta {
+      background: rgba(255, 76, 76, 0.15);
+      color: #FF4C4C;
+    }
+
+    .badge-priority-urgente {
+      background: rgba(255, 111, 0, 0.15);
+      color: #FF6F00;
+    }
+
+    .badge-priority-normal {
+      background: rgba(176, 143, 212, 0.15);
+      color: #B08FD4;
+    }
+
+    .k-status-select {
+      font-size: 11px;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-family: inherit;
+      margin-top: 8px;
+      width: 100%;
+      transition: all 0.2s;
+    }
+
+    .k-status-select:focus {
+      outline: none;
+    }
+
+    .k-status-select.st-pending {
+      background: rgba(176, 143, 212, 0.15);
+      color: #B08FD4;
+    }
+
+    .k-status-select.st-wip {
+      background: rgba(255, 214, 0, 0.15);
+      color: #FFD600;
+    }
+
+    .k-status-select.st-done {
+      background: rgba(0, 200, 83, 0.15);
+      color: #00C853;
+    }
+
+    .k-status-select.st-cancel {
+      background: rgba(255, 76, 76, 0.12);
+      color: #FF4C4C;
+    }
+
+    .k-status-select option {
+      background: #1A0533;
+      color: #F4EAFA;
+    }
+
+    /* Search View */
+    .search-view {
+      display: none;
+    }
+
+    .search-view.active {
+      display: block;
+    }
+
+    .search-container {
+      background: #1A0533;
+      border: 1px solid rgba(130, 10, 209, 0.2);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .search-input {
+      width: 100%;
+      max-width: 400px;
+      background: #1F0740;
+      border: 1px solid rgba(130, 10, 209, 0.2);
+      color: #F4EAFA;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #820AD1;
+    }
+
+    .search-results {
+      display: grid;
+      gap: 12px;
+    }
+
+    .search-result-item {
+      background: #1A0533;
+      border: 1px solid rgba(130, 10, 209, 0.2);
+      border-radius: 8px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .search-result-item:hover {
+      border-color: #820AD1;
+    }
+
+    /* Charts View */
+    .charts-view {
+      display: none;
+    }
+
+    .charts-view.active {
+      display: block;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .chart-container {
+      background: #1A0533;
+      border: 1px solid rgba(130, 10, 209, 0.2);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .chart-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #F4EAFA;
+    }
+
+    canvas {
+      max-width: 100%;
+    }
+
+    .table-container {
+      background: #1A0533;
+      border: 1px solid rgba(130, 10, 209, 0.2);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: rgba(130, 10, 209, 0.1);
+    }
+
+    th {
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      color: rgba(244, 234, 250, 0.6);
+      border-bottom: 1px solid rgba(130, 10, 209, 0.2);
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(130, 10, 209, 0.15);
+      font-size: 13px;
+    }
+
+    tbody tr:hover {
+      background: rgba(130, 10, 209, 0.05);
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(13, 0, 26, 0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #1A0533;
+      border: 1px solid rgba(130, 10, 209, 0.3);
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: rgba(244, 234, 250, 0.6);
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      color: #F4EAFA;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(244, 234, 250, 0.6);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    select {
+      width: 100%;
+      background: #1F0740;
+      border: 1px solid rgba(130, 10, 209, 0.2);
+      color: #F4EAFA;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: #820AD1;
+    }
+
+    textarea {
+      width: 100%;
+      background: #1F0740;
+      border: 1px solid rgba(130, 10, 209, 0.2);
+      color: #F4EAFA;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #820AD1;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 24px;
+    }
+
+    .btn-cancel {
+      padding: 10px 20px;
+      background: transparent;
+      border: 1px solid rgba(130, 10, 209, 0.3);
+      color: rgba(244, 234, 250, 0.7);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-cancel:hover {
+      border-color: #820AD1;
+      color: #F4EAFA;
+    }
+
+    .btn-save {
+      padding: 10px 20px;
+      background: #820AD1;
+      border: none;
+      color: #FFF;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-save:hover {
+      background: #9D1FE6;
+    }
+
+    /* Details Modal */
+    .slack-history {
+      background: rgba(130, 10, 209, 0.1);
+      border: 1px solid rgba(130, 10, 209, 0.2);
+      border-radius: 6px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .slack-message {
+      font-size: 12px;
+      color: rgba(244, 234, 250, 0.8);
+      line-height: 1.6;
+    }
+
+    .slack-from {
+      font-weight: 600;
+      color: #820AD1;
+      margin-bottom: 4px;
+    }
+
+    .slack-channel {
+      font-size: 11px;
+      color: rgba(244, 234, 250, 0.5);
+      margin-top: 8px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #820AD1;
+      color: #FFF;
+      padding: 14px 20px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(130, 10, 209, 0.3);
+      animation: slide-in 0.3s ease-out;
+      z-index: 2000;
+    }
+
+    @keyframes slide-in {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .toast.success {
+      background: #00C853;
+    }
+
+    .toast.error {
+      background: #FF4C4C;
+    }
+
+    .toast.warning {
+      background: #FFD600;
+      color: #000;
+    }
+  </style>
 </head>
 <body>
-
-<!-- HEADER -->
-<header class="app-header">
-  <div class="logo">
-    <svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#820AD1"/>
-    <path d="M8 16l5 5 11-11" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    <div><h1>Workplace Experience</h1><div class="subtitle" id="dateNow"></div></div>
-  </div>
-  <div class="header-actions">
-    <div class="tabs">
-      <button class="tab active" onclick="switchView('kanban',this)">Kanban</button>
-      <button class="tab" onclick="switchView('slack',this)">📨 Slack → Tarefas</button>
-      <button class="tab" onclick="switchView('charts',this)">Gráficos</button>
-    </div>
-    <button class="btn btn-primary" onclick="openAddModal()">＋ Nova Tarefa</button>
-    <button class="btn btn-ghost" onclick="downloadDashboard()" title="Baixar HTML">⬇ Baixar</button>
-  </div>
-</header>
-
-<!-- STATS -->
-<div class="stats-row">
-  <div class="stat-card stat-total"><div class="stat-icon">📊</div><div class="stat-val" id="sTotal">0</div><div class="stat-label">Total</div><div class="stat-pct">&nbsp;</div></div>
-  <div class="stat-card stat-pending"><div class="stat-icon">⏳</div><div class="stat-val" id="sPending">0</div><div class="stat-label">Sem Iniciar</div><div class="stat-pct" id="sPendingPct">0%</div></div>
-  <div class="stat-card stat-wip"><div class="stat-icon">🔄</div><div class="stat-val" id="sWip">0</div><div class="stat-label">Em Andamento</div><div class="stat-pct" id="sWipPct">0%</div></div>
-  <div class="stat-card stat-done"><div class="stat-icon">✅</div><div class="stat-val" id="sDone">0</div><div class="stat-label">Concluídas</div><div class="stat-pct" id="sDonePct">0%</div></div>
-  <div class="stat-card stat-cancel"><div class="stat-icon">✖️</div><div class="stat-val" id="sCancel">0</div><div class="stat-label">Canceladas</div><div class="stat-pct" id="sCancelPct">0%</div></div>
-</div>
-
-<!-- ===================== KANBAN VIEW ===================== -->
-<div class="view active" id="viewKanban">
-  <div id="overdueAlert" class="alert-bar hidden">
-    ⚠️ <span id="overdueMsg"></span>
-  </div>
-  <div class="filter-bar">
-    <label>Filtrar por pessoa:</label>
-    <select class="filter-select" id="personFilter" onchange="render()">
-      <option value="">Todos</option>
-    </select>
-    <label style="margin-left:8px">Prioridade:</label>
-    <button class="filter-tag active" onclick="togglePrioFilter('all',this)">Todos</button>
-    <button class="filter-tag" onclick="togglePrioFilter('urgente',this)" style="color:#FF4C4C">🔴 Urgente</button>
-    <button class="filter-tag" onclick="togglePrioFilter('alta',this)" style="color:#FFD600">🟡 Alta</button>
-    <button class="filter-tag" onclick="togglePrioFilter('normal',this)">Normal</button>
-  </div>
-  <div class="kanban">
-    <div class="kanban-col col-pending">
-      <div class="kanban-col-header"><h3>Sem Iniciar</h3><span class="col-cnt" id="cntPending">0</span></div>
-      <div class="kanban-col-body" id="colPending"></div>
-    </div>
-    <div class="kanban-col col-wip">
-      <div class="kanban-col-header"><h3>Em Andamento</h3><span class="col-cnt" id="cntWip">0</span></div>
-      <div class="kanban-col-body" id="colWip"></div>
-    </div>
-    <div class="kanban-col col-done">
-      <div class="kanban-col-header"><h3>Concluídas</h3><span class="col-cnt" id="cntDone">0</span></div>
-      <div class="kanban-col-body" id="colDone"></div>
-    </div>
-    <div class="kanban-col col-cancel">
-      <div class="kanban-col-header"><h3>Canceladas</h3><span class="col-cnt" id="cntCancel">0</span></div>
-      <div class="kanban-col-body" id="colCancel"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ===================== SLACK VIEW ===================== -->
-<div class="view" id="viewSlack">
-  <div class="slack-panel">
-    <h3>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-        <rect x="2" y="2" width="20" height="20" rx="5" fill="#4A154B"/>
-        <path d="M8.5 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm0 0v2.5M15.5 9.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm0 0v2.5M9.5 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm0 0h5M14.5 15.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm0 0h-5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-      Importar Mensagens do Slack
-    </h3>
-    <div class="slack-form">
-      <div class="slack-field">
-        <label>Canal (nome ou #canal)</label>
-        <input type="text" id="slackChannel" placeholder="ex: workplace-experience" value="">
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-left">
+        <div class="logo">
+          <div class="logo-icon">📊</div>
+          Workplace Experience
+        </div>
+        <div class="tabs">
+          <button class="tab active" onclick="switchView('kanban')">Kanban</button>
+          <button class="tab" onclick="switchView('search')">Slack → Tarefas</button>
+          <button class="tab" onclick="switchView('charts')">Gráficos</button>
+        </div>
       </div>
-      <div class="slack-field">
-        <label>Buscar por palavra-chave</label>
-        <input type="text" id="slackKeyword" placeholder="ex: tarefa, prazo, deadline...">
-      </div>
-      <div class="slack-field">
-        <label>Quantidade</label>
-        <select id="slackLimit">
-          <option value="10">10 mensagens</option>
-          <option value="20" selected>20 mensagens</option>
-          <option value="50">50 mensagens</option>
-        </select>
-      </div>
-      <button class="btn btn-primary" onclick="searchSlack()" id="btnSlackSearch">
-        🔍 Buscar
-      </button>
-    </div>
-    <div id="slackResults" class="slack-results" style="margin-top:16px"></div>
-  </div>
-</div>
-
-<!-- ===================== CHARTS VIEW ===================== -->
-<div class="view" id="viewCharts">
-  <div class="charts-grid">
-    <div class="chart-card full">
-      <h3>📊 Situação por Pessoa</h3>
-      <div id="chartPerson" class="bar-chart"></div>
-      <div class="chart-legend">
-        <div class="legend-item"><div class="legend-dot" style="background:#9B6DC6"></div>Sem Iniciar</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--nu-yellow)"></div>Em Andamento</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--nu-green)"></div>Concluídas</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--nu-red)"></div>Canceladas</div>
+      <div class="header-right">
+        <button class="btn btn-primary" onclick="openAddModal()">+ Nova Tarefa</button>
+        <button class="btn btn-secondary" onclick="downloadData()">⬇️ Baixar</button>
       </div>
     </div>
-    <div class="chart-card">
-      <h3>🍩 Distribuição Geral</h3>
-      <div id="chartDonut" class="donut-container"></div>
-    </div>
-    <div class="chart-card">
-      <h3>⚠️ Tarefas Atrasadas por Pessoa</h3>
-      <div id="chartOverdue" class="bar-chart" style="margin-top:8px"></div>
-    </div>
-    <div class="chart-card full">
-      <h3>📋 Detalhamento por Pessoa</h3>
-      <table class="time-table">
-        <thead><tr><th>Pessoa</th><th>Sem Iniciar</th><th>WIP</th><th>Concluídas</th><th>Canceladas</th><th>Total</th><th>Atrasadas</th></tr></thead>
-        <tbody id="tableBody"></tbody>
-      </table>
+
+    <!-- Main Content -->
+    <div class="main">
+      <!-- Stats Row -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-total">0</div>
+          <div class="stat-label">Total</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-pending">0</div>
+          <div class="stat-label">Sem Iniciar</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-wip">0</div>
+          <div class="stat-label">Em Andamento</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-done">0</div>
+          <div class="stat-label">Concluídas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-cancel">0</div>
+          <div class="stat-label">Canceladas</div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters">
+        <div class="filter-group">
+          <label class="filter-label">Atribuído a:</label>
+          <select class="filter-select" id="filter-person" onchange="applyFilters()">
+            <option value="">Todos</option>
+            <option value="Wlisses">Wlisses</option>
+            <option value="Sheila">Sheila</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Prioridade:</label>
+          <div class="priority-buttons">
+            <button class="priority-btn active" data-priority="" onclick="setPriority('', this)">Todos</button>
+            <button class="priority-btn" data-priority="urgente" onclick="setPriority('urgente', this)">🔥 Urgente</button>
+            <button class="priority-btn" data-priority="alta" onclick="setPriority('alta', this)">⚡ Alta</button>
+            <button class="priority-btn" data-priority="normal" onclick="setPriority('normal', this)">Normal</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kanban View -->
+      <div class="kanban-container active" id="kanban-view">
+        <div class="kanban-column">
+          <div class="kanban-column-title">⏳ Sem Iniciar</div>
+          <div class="kanban-cards" id="col-pending"></div>
+        </div>
+        <div class="kanban-column">
+          <div class="kanban-column-title">🔄 Em Andamento</div>
+          <div class="kanban-cards" id="col-wip"></div>
+        </div>
+        <div class="kanban-column">
+          <div class="kanban-column-title">✅ Concluídas</div>
+          <div class="kanban-cards" id="col-done"></div>
+        </div>
+        <div class="kanban-column">
+          <div class="kanban-column-title">✖️ Canceladas</div>
+          <div class="kanban-cards" id="col-cancel"></div>
+        </div>
+      </div>
+
+      <!-- Search View -->
+      <div class="search-view" id="search-view">
+        <div class="search-container">
+          <input type="text" class="search-input" id="search-input" placeholder="Buscar mensagens do Slack..." oninput="searchSlack()">
+        </div>
+        <div class="search-results" id="search-results"></div>
+      </div>
+
+      <!-- Charts View -->
+      <div class="charts-view" id="charts-view">
+        <div class="charts-grid">
+          <div class="chart-container">
+            <div class="chart-title">Tarefas por Pessoa (Empilhado)</div>
+            <canvas id="chart-stacked"></canvas>
+          </div>
+          <div class="chart-container">
+            <div class="chart-title">Distribuição de Status</div>
+            <canvas id="chart-donut"></canvas>
+          </div>
+        </div>
+        <div class="table-container">
+          <div class="chart-title">Resumo por Pessoa</div>
+          <table id="summary-table">
+            <thead>
+              <tr>
+                <th>Pessoa</th>
+                <th>Sem Iniciar</th>
+                <th>Em Andamento</th>
+                <th>Concluídas</th>
+                <th>Canceladas</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- CONTEXT MENU -->
-<div class="ctx-menu" id="ctxMenu">
-  <div class="ctx-item" onclick="moveTask('pending')"><div class="ctx-dot" style="background:#9B6DC6"></div>Sem Iniciar</div>
-  <div class="ctx-item" onclick="moveTask('wip')"><div class="ctx-dot" style="background:var(--nu-yellow)"></div>Em Andamento</div>
-  <div class="ctx-item" onclick="moveTask('done')"><div class="ctx-dot" style="background:var(--nu-green)"></div>Concluída</div>
-  <div class="ctx-item" onclick="moveTask('cancel')"><div class="ctx-dot" style="background:var(--nu-red)"></div>Cancelada</div>
-</div>
-
-<!-- ADD/EDIT TASK MODAL -->
-<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <h2 id="modalTitle">✨ Nova Tarefa</h2>
-    <div id="modalSourceBox" class="modal-source" style="display:none">
-      <strong>💬 Mensagem original do Slack</strong>
-      <span id="modalSourceText"></span>
-    </div>
-    <div class="fg"><label>Tarefa *</label><input id="fTitle" placeholder="Descreva a tarefa…"></div>
-    <div class="fg"><label>Detalhes</label><textarea id="fDesc" placeholder="Informações extras (opcional)"></textarea></div>
-    <div class="fg"><label>Responsável *</label><input id="fAssignee" placeholder="Nome da pessoa"></div>
-    <div class="fg"><label>Deadline *</label><input type="date" id="fDeadline"></div>
-    <div class="fg"><label>Prioridade</label>
-      <select id="fPriority">
-        <option value="normal">Normal</option>
-        <option value="alta">Alta</option>
-        <option value="urgente">Urgente</option>
-      </select>
-    </div>
-    <div class="modal-btns">
-      <button class="btn-sec" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveTask()" id="btnSaveTask">Criar Tarefa</button>
+  <!-- Add/Edit Task Modal -->
+  <div class="modal" id="task-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span id="modal-title">Nova Tarefa</span>
+        <button class="modal-close" onclick="closeModal('task-modal')">×</button>
+      </div>
+      <form onsubmit="saveTask(event)">
+        <div class="form-group">
+          <label class="form-label">Título</label>
+          <input type="text" id="task-title" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descrição</label>
+          <textarea id="task-description"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Atribuído a:</label>
+          <select id="task-assignee" required>
+            <option value="">Selecione</option>
+            <option value="Wlisses">Wlisses</option>
+            <option value="Sheila">Sheila</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prazo</label>
+          <input type="date" id="task-deadline" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prioridade</label>
+          <select id="task-priority" required>
+            <option value="normal">Normal</option>
+            <option value="alta">Alta</option>
+            <option value="urgente">Urgente</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select id="task-status" required>
+            <option value="pending">⏳ Sem Iniciar</option>
+            <option value="wip">🔄 Em Andamento</option>
+            <option value="done">✅ Concluída</option>
+            <option value="cancel">✖️ Cancelada</option>
+          </select>
+        </div>
+        <div class="modal-buttons">
+          <button type="button" class="btn-cancel" onclick="closeModal('task-modal')">Cancelar</button>
+          <button type="submit" class="btn-save">Salvar Tarefa</button>
+        </div>
+      </form>
     </div>
   </div>
-</div>
 
-<!-- DETAIL MODAL -->
-<div class="modal-bg" id="detailBg" onclick="if(event.target===this)closeDetail()">
-  <div class="modal">
-    <h2 id="detailTitle" style="margin-bottom:16px"></h2>
-    <div id="detailBody"></div>
-    <div class="modal-btns">
-      <button class="btn-sec" onclick="closeDetail()">Fechar</button>
-      <button class="btn btn-primary" onclick="editFromDetail()">✏️ Editar</button>
+  <!-- Details Modal -->
+  <div class="modal" id="details-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span id="details-title">Detalhes da Tarefa</span>
+        <button class="modal-close" onclick="closeModal('details-modal')">×</button>
+      </div>
+      <div id="details-content"></div>
     </div>
   </div>
-</div>
 
-<!-- TOAST -->
-<div class="toast hidden" id="toast"></div>
+  <!-- Toast -->
+  <div class="toast" id="toast" style="display: none;"></div>
 
-<script>
-// ─── STATE ───────────────────────────────────────────────────────────────────
-// Versão dos dados — alterar força reset do localStorage
-const DATA_VERSION = 'slack-real-v1';
-if (localStorage.getItem('nu_tasks_version') !== DATA_VERSION) {
-  localStorage.removeItem('nu_tasks_v2');
-  localStorage.setItem('nu_tasks_version', DATA_VERSION);
-}
-let tasks = JSON.parse(localStorage.getItem('nu_tasks_v2') || '[]');
-let ctxTaskId = null;
-let editingId = null;
-let detailTaskId = null;
-let activePrioFilter = 'all';
-let pendingSlackMsg = null;   // {text, from, ts, channel}
+  <script>
+    // Data initialization
+    const DATA_VERSION = 'slack-real-v1';
+    if (localStorage.getItem('nu_tasks_version') !== DATA_VERSION) {
+      localStorage.removeItem('nu_tasks_v2');
+      localStorage.setItem('nu_tasks_version', DATA_VERSION);
+    }
 
-// ─── SEED — Tarefas reais do Slack #wx-2-0-new-team ──────────────────────────
-if (!tasks.length) {
-  const slackTasks = [
-    {
-      title: 'Tirar fotos da sala Meteoro, Nubar e Copinha para registro no Confluence',
-      description: 'Wlisses vai fazer check presencial e registrar as fotos para documentação dos espaços.',
-      assignee: 'Wlisses',
-      deadline: '2026-04-08',
-      priority: 'alta',
-      status: 'pending',
-      slackMsg: {
-        text: 'Agenda e Planejamento | Next Week — SEG 06/04 HQs 08h às 17h48. Wlisses realizará check presencial e registrará fotos dos espaços Meteoro, Nubar e Copinha para o Confluence.',
-        from: 'Wlisses Araujo',
-        channel: 'wx-2-0-new-team',
-        ts: '1775138674.532119'
+    let tasks = [];
+    let currentEditId = null;
+    let currentFilter = { person: '', priority: '' };
+
+    // Seed data
+    const seedData = [
+      {
+        id: 'task-1',
+        title: 'Tirar fotos da sala Meteoro, Nubar e Copinha para registro no Confluence',
+        description: 'Documentação fotográfica das salas para arquivo',
+        assignee: 'Wlisses',
+        deadline: '2026-04-08',
+        priority: 'alta',
+        status: 'pending',
+        createdAt: '2026-04-07T10:00:00Z',
+        finishedAt: null,
+        slackMsg: { from: 'Wlisses Araujo', channel: 'wx-2-0-new-team', ts: '1775138674.532119' }
+      },
+      {
+        id: 'task-2',
+        title: 'Adicionar sala Meteoro e Nubar no Confluence de eventos (após check presencial)',
+        description: 'Atualizar documentação após verificação in loco',
+        assignee: 'Sheila',
+        deadline: '2026-04-10',
+        priority: 'normal',
+        status: 'pending',
+        createdAt: '2026-04-07T10:00:00Z',
+        finishedAt: null,
+        slackMsg: { from: 'Wlisses Araujo', channel: 'wx-2-0-new-team', ts: '1775138674.532119' }
+      },
+      {
+        id: 'task-3',
+        title: 'Programar abertura da agenda do Nubar',
+        description: 'Configurar disponibilidade de agenda',
+        assignee: 'Sheila',
+        deadline: '2026-04-15',
+        priority: 'normal',
+        status: 'pending',
+        createdAt: '2026-04-07T10:00:00Z',
+        finishedAt: null,
+        slackMsg: { from: 'Wlisses Araujo', channel: 'wx-2-0-new-team', ts: '1775138674.532119' }
+      },
+      {
+        id: 'task-4',
+        title: 'Avaliar planilha das EAs e demais reservas para o Capote 210',
+        description: 'Análise das alocações de recursos',
+        assignee: 'Wlisses',
+        deadline: '2026-04-08',
+        priority: 'normal',
+        status: 'pending',
+        createdAt: '2026-04-07T10:00:00Z',
+        finishedAt: null,
+        slackMsg: { from: 'Wlisses Araujo', channel: 'wx-2-0-new-team', ts: '1775078911.231809' }
+      },
+      {
+        id: 'task-5',
+        title: 'Verificar possibilidade de adicionar etiquetas das agendas Capote 210 no Pipefy',
+        description: 'Explorar integração de rótulos',
+        assignee: 'Sheila',
+        deadline: '2026-04-10',
+        priority: 'normal',
+        status: 'pending',
+        createdAt: '2026-04-07T10:00:00Z',
+        finishedAt: null,
+        slackMsg: { from: 'Wlisses Araujo', channel: 'wx-2-0-new-team', ts: '1775147781.564119' }
+      },
+      {
+        id: 'task-6',
+        title: 'Compartilhar fotos dos layouts do Capote com a Oikos para criação do book',
+        description: 'Envio de material fotográfico para produção',
+        assignee: 'Wlisses',
+        deadline: '2026-04-09',
+        priority: 'normal',
+        status: 'pending',
+        createdAt: '2026-04-07T10:00:00Z',
+        finishedAt: null,
+        slackMsg: { from: 'Sheila Sousa', channel: 'wx-2-0-new-team', ts: '1774960841.793029' }
+      },
+      {
+        id: 'task-7',
+        title: 'Reajuste de acessibilidade/fluxo entre cadeiras — Nuniverse (pós reabertura julho)',
+        description: 'Melhorias de acessibilidade após reabertura',
+        assignee: 'Wlisses',
+        deadline: '2026-07-01',
+        priority: 'normal',
+        status: 'pending',
+        createdAt: '2026-04-07T10:00:00Z',
+        finishedAt: null,
+        slackMsg: { from: 'Wlisses Araujo', channel: 'wx-2-0-new-team', ts: '1774620060.078099' }
+      },
+      {
+        id: 'task-8',
+        title: 'Alinhar detalhes do Coffee Break Aniversário Nu 19/05 com Camila Faria (catering, Central Park, tamanho)',
+        description: 'Coordenação de evento de aniversário',
+        assignee: 'Sheila',
+        deadline: '2026-04-25',
+        priority: 'alta',
+        status: 'pending',
+        createdAt: '2026-04-07T10:00:00Z',
+        finishedAt: null,
+        slackMsg: { from: 'Wlisses Araujo', channel: 'wx-2-0-new-team', ts: '1774392509.557119' }
       }
-    },
-    {
-      title: 'Adicionar sala Meteoro e Nubar no Confluence de eventos (após check presencial)',
-      description: 'Após Wlisses fazer o check e tirar as fotos, atualizar o Confluence com as informações dos novos espaços.',
-      assignee: 'Sheila',
-      deadline: '2026-04-10',
-      priority: 'normal',
-      status: 'pending',
-      slackMsg: {
-        text: 'Agenda e Planejamento | Next Week — após check presencial e fotos, atualizar o Confluence com salas Meteoro e Nubar.',
-        from: 'Wlisses Araujo',
-        channel: 'wx-2-0-new-team',
-        ts: '1775138674.532119'
-      }
-    },
-    {
-      title: 'Programar abertura da agenda do Nubar',
-      description: 'Definir e configurar a agenda de uso do Nubar para o time.',
-      assignee: 'Sheila',
-      deadline: '2026-04-15',
-      priority: 'normal',
-      status: 'pending',
-      slackMsg: {
-        text: 'Agenda e Planejamento | Next Week — Programar abertura da agenda do Nubar.',
-        from: 'Wlisses Araujo',
-        channel: 'wx-2-0-new-team',
-        ts: '1775138674.532119'
-      }
-    },
-    {
-      title: 'Avaliar planilha das EAs e demais reservas para o Capote 210',
-      description: 'Wlisses vai aceitar os convites de agenda na segunda e fazer avaliação completa da planilha das EAs e outras reservas do Capote 210.',
-      assignee: 'Wlisses',
-      deadline: '2026-04-08',
-      priority: 'normal',
-      status: 'pending',
-      slackMsg: {
-        text: 'Calendar Capote 210 — Bom dia, Sheila! Muito obrigada por compartilhar. Na segunda-feira irei aceitar as agendas e farei a avaliação da planilha das EAs e outras reservas para o Capote 210.',
-        from: 'Wlisses Araujo',
-        channel: 'wx-2-0-new-team',
-        ts: '1775078911.231809'
-      }
-    },
-    {
-      title: 'Verificar possibilidade de adicionar etiquetas das agendas Capote 210 no Pipefy',
-      description: 'Wlisses perguntou se é possível ter as etiquetas das agendas do Capote 210 refletidas no Pipefy.',
-      assignee: 'Sheila',
-      deadline: '2026-04-10',
-      priority: 'normal',
-      status: 'pending',
-      slackMsg: {
-        text: 'Calendar Capote 210 — Sheila, é possível ter as etiquetas dessas agendas em nosso pipefy?',
-        from: 'Wlisses Araujo',
-        channel: 'wx-2-0-new-team',
-        ts: '1775147781.564119'
-      }
-    },
-    {
-      title: 'Compartilhar fotos dos layouts do Capote com a Oikos para criação do book',
-      description: 'Após registro fotográfico do Capote 210, encaminhar fotos para a Oikos para produção do book de espaços.',
-      assignee: 'Wlisses',
-      deadline: '2026-04-09',
-      priority: 'normal',
-      status: 'pending',
-      slackMsg: {
-        text: 'Espaço de eventos Capote — compartilhar fotos dos layouts com a Oikos para criação do book de espaços.',
-        from: 'Sheila Sousa',
-        channel: 'wx-2-0-new-team',
-        ts: '1774960841.793029'
-      }
-    },
-    {
-      title: 'Reajuste de acessibilidade/fluxo entre cadeiras — Nuniverse (pós reabertura julho)',
-      description: 'Melhoria de acessibilidade no fluxo entre cadeiras do Nuniverse. Ação prevista para após a reabertura em julho. Portas são corta-fogo, solução via reposicionamento de mobiliário.',
-      assignee: 'Wlisses',
-      deadline: '2026-07-01',
-      priority: 'normal',
-      status: 'pending',
-      slackMsg: {
-        text: 'Melhoria de acessibilidade/fluxo: Trava-porta para Day1 - HQ1 — as portas são corta-fogo, não podem ficar abertas. Solução via reposicionamento de cadeiras após reabertura do Nuniverse em julho.',
-        from: 'Wlisses Araujo',
-        channel: 'wx-2-0-new-team',
-        ts: '1774620060.078099'
-      }
-    },
-    {
-      title: 'Alinhar detalhes do Coffee Break Aniversário Nu 19/05 com Camila Faria (catering, Central Park, tamanho)',
-      description: 'Coffee Break no Day1 (Spark) das 16h às 17h30 em 19/05. Camila Faria ainda não falou com Sheila. Precisa entender o tamanho do evento, catering e se usarão o Central Park também. Wlisses já bloqueou o CP o dia inteiro.',
-      assignee: 'Sheila',
-      deadline: '2026-04-25',
-      priority: 'alta',
-      status: 'pending',
-      slackMsg: {
-        text: 'Coffee Break - Aniversário Nu 19/05 — Camila Faria nos procurou para agendamento do CB no Day1 (Spark) das 16h às 17h30. Sheila, você já deve estar ciente dessa data? Ainda não temos infos sobre catering. Sheila: ela ainda não falou comigo, vamos precisar entender o tamanho da brincadeira, porque sempre usam o Central Park tb. Wlisses: Vamos puxar mais infos. Já deixei um block o dia inteiro no CP.',
-        from: 'Wlisses Araujo',
-        channel: 'wx-2-0-new-team',
-        ts: '1774392509.557119'
+    ];
+
+    function load() {
+      const stored = localStorage.getItem('nu_tasks_v2');
+      if (stored) {
+        try {
+          tasks = JSON.parse(stored);
+        } catch {
+          tasks = seedData;
+          save();
+        }
+      } else {
+        tasks = seedData;
+        save();
       }
     }
-  ];
 
-  const now = new Date().toISOString();
-  slackTasks.forEach(t => {
-    tasks.push({
-      id: uid(),
-      title: t.title,
-      description: t.description,
-      assignee: t.assignee,
-      deadline: t.deadline,
-      priority: t.priority,
-      status: t.status,
-      createdAt: now,
-      finishedAt: null,
-      slackMsg: t.slackMsg
-    });
-  });
-  save();
-}
-
-// ─── UTILS ───────────────────────────────────────────────────────────────────
-function uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2,5); }
-function save() { localStorage.setItem('nu_tasks_v2', JSON.stringify(tasks)); }
-function esc(s) { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
-function pct(n,t) { return t ? Math.round(n/t*100)+'%' : '0%'; }
-function fmtDate(d) {
-  return new Date(d+'T00:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
-}
-function dlStatus(dl,st) {
-  if(st==='done'||st==='cancel') return 'ok';
-  const t=new Date(); t.setHours(0,0,0,0);
-  const diff=(new Date(dl+'T00:00:00')-t)/864e5;
-  return diff<0?'overdue':diff<=2?'warn':'ok';
-}
-function dlLabel(dl,st) {
-  if(st==='done') return '✓';
-  if(st==='cancel') return '—';
-  const t=new Date(); t.setHours(0,0,0,0);
-  const diff=Math.ceil((new Date(dl+'T00:00:00')-t)/864e5);
-  if(diff<0) return Math.abs(diff)+'d atraso';
-  if(diff===0) return 'Hoje!';
-  if(diff===1) return 'Amanhã';
-  return diff+'d';
-}
-function showToast(msg, duration=2500) {
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.remove('hidden');
-  setTimeout(()=>t.classList.add('hidden'), duration);
-}
-
-// ─── DATE INFO ───────────────────────────────────────────────────────────────
-document.getElementById('dateNow').textContent = new Date().toLocaleDateString('pt-BR',{
-  weekday:'long',day:'numeric',month:'long',year:'numeric'
-});
-
-// ─── STATS ───────────────────────────────────────────────────────────────────
-function updateStats() {
-  const total=tasks.length;
-  const p=tasks.filter(x=>x.status==='pending').length;
-  const w=tasks.filter(x=>x.status==='wip').length;
-  const d=tasks.filter(x=>x.status==='done').length;
-  const c=tasks.filter(x=>x.status==='cancel').length;
-  document.getElementById('sTotal').textContent=total;
-  document.getElementById('sPending').textContent=p;
-  document.getElementById('sPendingPct').textContent=pct(p,total);
-  document.getElementById('sWip').textContent=w;
-  document.getElementById('sWipPct').textContent=pct(w,total);
-  document.getElementById('sDone').textContent=d;
-  document.getElementById('sDonePct').textContent=pct(d,total);
-  document.getElementById('sCancel').textContent=c;
-  document.getElementById('sCancelPct').textContent=pct(c,total);
-}
-
-// ─── PERSON FILTER ───────────────────────────────────────────────────────────
-function updatePersonFilter() {
-  const sel=document.getElementById('personFilter');
-  const current=sel.value;
-  const people=[...new Set(tasks.map(t=>t.assignee).filter(Boolean))].sort();
-  sel.innerHTML='<option value="">Todos</option>'+people.map(p=>`<option value="${esc(p)}"${p===current?' selected':''}>${esc(p)}</option>`).join('');
-}
-function togglePrioFilter(val, btn) {
-  activePrioFilter=val;
-  document.querySelectorAll('.filter-tag').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  render();
-}
-
-// ─── KANBAN ──────────────────────────────────────────────────────────────────
-function getFilteredTasks() {
-  let list=[...tasks];
-  const person=document.getElementById('personFilter')?.value||'';
-  if(person) list=list.filter(t=>t.assignee===person);
-  if(activePrioFilter!=='all') list=list.filter(t=>t.priority===activePrioFilter);
-  return list;
-}
-
-function renderKanban() {
-  const filtered=getFilteredTasks();
-  const cols={pending:[],wip:[],done:[],cancel:[]};
-  filtered.forEach(t=>{ if(cols[t.status]) cols[t.status].push(t); });
-
-  const map={pending:'Pending',wip:'Wip',done:'Done',cancel:'Cancel'};
-  Object.keys(cols).forEach(s=>{
-    const el=document.getElementById('col'+map[s]);
-    const cn=document.getElementById('cnt'+map[s]);
-    const items=cols[s].sort((a,b)=>new Date(a.deadline)-new Date(b.deadline));
-    cn.textContent=items.length;
-    if(!items.length){ el.innerHTML='<div class="kanban-empty">Nenhuma tarefa</div>'; return; }
-    el.innerHTML=items.map(t=>{
-      const ds=dlStatus(t.deadline,t.status);
-      const dc=ds==='overdue'?'dl-overdue':ds==='warn'?'dl-warn':'dl-ok';
-      const cc=ds==='overdue'?'overdue':ds==='warn'?'warn':'';
-      const pi=t.priority==='urgente'?'🔴 ':t.priority==='alta'?'🟡 ':'';
-      const slackBadge=t.slackMsg?`<div class="k-slack-badge">💬 via Slack</div>`:'';
-      return `<div class="k-card ${cc}">
-        <div class="k-actions">
-          <button class="k-act k-act-move" onclick="event.stopPropagation();openCtx(event,'${t.id}')" title="Mover">▸</button>
-          <button class="k-act k-act-edit" onclick="event.stopPropagation();openEditModal('${t.id}')" title="Editar">✏</button>
-          <button class="k-act k-act-del" onclick="event.stopPropagation();delTask('${t.id}')" title="Excluir">×</button>
-        </div>
-        <div class="k-title">${pi}${esc(t.title)}</div>
-        ${slackBadge}
-        <div class="k-meta"><span>📅 Prazo: ${fmtDate(t.deadline)}</span></div>
-        <div class="k-assignee-row">
-          <span class="k-assignee-name">${esc(t.assignee||'—')}</span>
-          <span class="k-dl-badge ${dc}">${dlLabel(t.deadline,t.status)}</span>
-        </div>
-      </div>`;
-    }).join('');
-    // attach click for detail
-    el.querySelectorAll('.k-card').forEach((card,i)=>{
-      card.addEventListener('click', ()=>openDetail(items[i].id));
-    });
-  });
-
-  // overdue alert
-  const overdueActive=tasks.filter(t=>dlStatus(t.deadline,t.status)==='overdue');
-  const alertEl=document.getElementById('overdueAlert');
-  if(overdueActive.length>0){
-    alertEl.classList.remove('hidden');
-    document.getElementById('overdueMsg').textContent=
-      `${overdueActive.length} tarefa${overdueActive.length>1?'s':''} atrasada${overdueActive.length>1?'s':''}! Confira os cartões com borda vermelha.`;
-  } else {
-    alertEl.classList.add('hidden');
-  }
-}
-
-// ─── CHARTS ──────────────────────────────────────────────────────────────────
-function renderCharts() {
-  const people={};
-  tasks.forEach(t=>{
-    const n=t.assignee||'(vazio)';
-    if(!people[n]) people[n]={pending:0,wip:0,done:0,cancel:0,overdue:0};
-    people[n][t.status]++;
-    if(dlStatus(t.deadline,t.status)==='overdue') people[n].overdue++;
-  });
-
-  // Stacked bars
-  const maxT=Math.max(...Object.values(people).map(p=>p.pending+p.wip+p.done+p.cancel),1);
-  document.getElementById('chartPerson').innerHTML=Object.entries(people).map(([name,d])=>{
-    const tot=d.pending+d.wip+d.done+d.cancel;
-    const pw=s=>(d[s]/maxT*100).toFixed(1);
-    return `<div class="bar-row">
-      <div class="bar-name">${esc(name)}</div>
-      <div class="bar-track">
-        ${d.pending?`<div class="bar-seg seg-pending" style="width:${pw('pending')}%" title="Sem iniciar: ${d.pending}"></div>`:''}
-        ${d.wip?`<div class="bar-seg seg-wip" style="width:${pw('wip')}%" title="WIP: ${d.wip}"></div>`:''}
-        ${d.done?`<div class="bar-seg seg-done" style="width:${pw('done')}%" title="Concluídas: ${d.done}"></div>`:''}
-        ${d.cancel?`<div class="bar-seg seg-cancel" style="width:${pw('cancel')}%" title="Canceladas: ${d.cancel}"></div>`:''}
-      </div>
-      <div class="bar-total">${tot}</div>
-    </div>`;
-  }).join('');
-
-  // Overdue bars
-  const maxOv=Math.max(...Object.values(people).map(p=>p.overdue),1);
-  const ovEntries=Object.entries(people).filter(([,d])=>d.overdue>0);
-  document.getElementById('chartOverdue').innerHTML=ovEntries.length
-    ? ovEntries.sort((a,b)=>b[1].overdue-a[1].overdue).map(([name,d])=>`
-      <div class="bar-row">
-        <div class="bar-name">${esc(name)}</div>
-        <div class="bar-track">
-          <div class="bar-seg seg-cancel" style="width:${(d.overdue/maxOv*100).toFixed(1)}%" title="${d.overdue} atrasadas"></div>
-        </div>
-        <div class="bar-total" style="color:var(--nu-red)">${d.overdue}</div>
-      </div>`).join('')
-    : '<div class="kanban-empty" style="height:60px;font-size:13px">✅ Nenhuma tarefa atrasada!</div>';
-
-  // Donut
-  const totals={pending:tasks.filter(x=>x.status==='pending').length,wip:tasks.filter(x=>x.status==='wip').length,
-    done:tasks.filter(x=>x.status==='done').length,cancel:tasks.filter(x=>x.status==='cancel').length};
-  const total=tasks.length||1;
-  const colors={pending:'#9B6DC6',wip:'#FFD600',done:'#00C853',cancel:'#FF4C4C'};
-  const labels={pending:'Sem Iniciar',wip:'Em Andamento',done:'Concluídas',cancel:'Canceladas'};
-  let cumPct=0;
-  const segs=Object.entries(totals).filter(([,v])=>v>0).map(([k,v])=>{
-    const p=v/total*100; const dash=p*2.51327; const gap=251.327-dash;
-    const offset=-cumPct*2.51327+62.83; cumPct+=p;
-    return `<circle cx="50" cy="50" r="40" fill="none" stroke="${colors[k]}" stroke-width="18"
-      stroke-dasharray="${dash} ${gap}" stroke-dashoffset="${offset}" style="transition:all .6s ease"/>`;
-  }).join('');
-  document.getElementById('chartDonut').innerHTML=`
-    <svg class="donut-svg" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="18"/>
-      ${segs}
-      <text x="50" y="47" text-anchor="middle" fill="#fff" font-size="16" font-weight="700">${total}</text>
-      <text x="50" y="58" text-anchor="middle" fill="#B08FD4" font-size="6">TAREFAS</text>
-    </svg>
-    <div class="donut-legend">${Object.entries(totals).map(([k,v])=>`
-      <div class="donut-legend-item">
-        <div class="donut-legend-dot" style="background:${colors[k]}"></div>
-        <span class="donut-legend-label">${labels[k]}</span>
-        <span class="donut-legend-val">${v} <span style="color:var(--nu-text-muted);font-size:11px">(${pct(v,total)})</span></span>
-      </div>`).join('')}
-    </div>`;
-
-  // Table
-  document.getElementById('tableBody').innerHTML=Object.entries(people).map(([name,d])=>{
-    const tot=d.pending+d.wip+d.done+d.cancel;
-    const ovCls=d.overdue>0?'days-bad':'days-good';
-    return `<tr>
-      <td style="font-weight:600">${esc(name)}</td>
-      <td>${d.pending}</td><td>${d.wip}</td><td>${d.done}</td><td>${d.cancel}</td>
-      <td style="font-weight:600">${tot}</td>
-      <td class="days-cell ${ovCls}">${d.overdue>0?`⚠️ ${d.overdue}`:'✅ 0'}</td>
-    </tr>`;
-  }).join('');
-}
-
-// ─── RENDER ──────────────────────────────────────────────────────────────────
-function render() {
-  updateStats();
-  updatePersonFilter();
-  renderKanban();
-  renderCharts();
-}
-
-// ─── VIEW SWITCH ─────────────────────────────────────────────────────────────
-function switchView(v, btn) {
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  btn.classList.add('active');
-  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
-  const map={kanban:'viewKanban',slack:'viewSlack',charts:'viewCharts'};
-  document.getElementById(map[v]).classList.add('active');
-}
-
-// ─── TASK MODAL (ADD/EDIT) ────────────────────────────────────────────────────
-function openAddModal(prefill) {
-  editingId=null;
-  pendingSlackMsg=prefill||null;
-  document.getElementById('modalTitle').textContent='✨ Nova Tarefa';
-  document.getElementById('btnSaveTask').textContent='Criar Tarefa';
-  document.getElementById('fTitle').value=prefill?.title||'';
-  document.getElementById('fDesc').value='';
-  document.getElementById('fAssignee').value=prefill?.assignee||'';
-  document.getElementById('fDeadline').value=prefill?.deadline||'';
-  document.getElementById('fPriority').value='normal';
-  const srcBox=document.getElementById('modalSourceBox');
-  if(prefill?.slackText){
-    srcBox.style.display='block';
-    document.getElementById('modalSourceText').textContent=prefill.slackText;
-  } else {
-    srcBox.style.display='none';
-  }
-  document.getElementById('modalBg').classList.add('show');
-  setTimeout(()=>document.getElementById('fTitle').focus(),100);
-}
-
-function openEditModal(id) {
-  const t=tasks.find(x=>x.id===id);
-  if(!t) return;
-  editingId=id;
-  pendingSlackMsg=null;
-  document.getElementById('modalTitle').textContent='✏️ Editar Tarefa';
-  document.getElementById('btnSaveTask').textContent='Salvar Alterações';
-  document.getElementById('fTitle').value=t.title;
-  document.getElementById('fDesc').value=t.description||'';
-  document.getElementById('fAssignee').value=t.assignee;
-  document.getElementById('fDeadline').value=t.deadline;
-  document.getElementById('fPriority').value=t.priority||'normal';
-  const srcBox=document.getElementById('modalSourceBox');
-  if(t.slackMsg){
-    srcBox.style.display='block';
-    document.getElementById('modalSourceText').textContent=t.slackMsg.text||'';
-  } else {
-    srcBox.style.display='none';
-  }
-  closeDetail();
-  document.getElementById('modalBg').classList.add('show');
-  setTimeout(()=>document.getElementById('fTitle').focus(),100);
-}
-
-function closeModal() { document.getElementById('modalBg').classList.remove('show'); }
-
-function saveTask() {
-  const title=document.getElementById('fTitle').value.trim();
-  const assignee=document.getElementById('fAssignee').value.trim();
-  const deadline=document.getElementById('fDeadline').value;
-  if(!title){document.getElementById('fTitle').focus();return;}
-  if(!assignee){document.getElementById('fAssignee').focus();return;}
-  if(!deadline){document.getElementById('fDeadline').focus();return;}
-
-  if(editingId) {
-    const t=tasks.find(x=>x.id===editingId);
-    if(t){
-      t.title=title; t.description=document.getElementById('fDesc').value.trim();
-      t.assignee=assignee; t.deadline=deadline;
-      t.priority=document.getElementById('fPriority').value;
+    function save() {
+      localStorage.setItem('nu_tasks_v2', JSON.stringify(tasks));
     }
-    showToast('✅ Tarefa atualizada!');
-  } else {
-    tasks.push({
-      id:uid(), title, description:document.getElementById('fDesc').value.trim(),
-      assignee, deadline, priority:document.getElementById('fPriority').value,
-      status:'pending', createdAt:new Date().toISOString(), finishedAt:null,
-      slackMsg: pendingSlackMsg ? {text:pendingSlackMsg.slackText, from:pendingSlackMsg.from, ts:pendingSlackMsg.ts, channel:pendingSlackMsg.channel} : null
-    });
-    showToast('🎉 Tarefa criada!');
-  }
-  save(); render(); closeModal();
-}
 
-// ─── DETAIL MODAL ────────────────────────────────────────────────────────────
-function openDetail(id) {
-  const t=tasks.find(x=>x.id===id);
-  if(!t) return;
-  detailTaskId=id;
-  document.getElementById('detailTitle').textContent=
-    (t.priority==='urgente'?'🔴 ':t.priority==='alta'?'🟡 ':'')+t.title;
-  const ds=dlStatus(t.deadline,t.status);
-  const dc=ds==='overdue'?'color:var(--nu-red)':ds==='warn'?'color:var(--nu-yellow)':'color:var(--nu-green)';
-  const stMap={pending:'⏳ Sem Iniciar',wip:'🔄 Em Andamento',done:'✅ Concluída',cancel:'✖️ Cancelada'};
-  let html=`
-    <div class="detail-row"><div class="detail-label">Status</div><div class="detail-val">${stMap[t.status]||t.status}</div></div>
-    <div class="detail-row"><div class="detail-label">Responsável</div><div class="detail-val" style="color:var(--nu-purple);font-weight:600">${esc(t.assignee||'—')}</div></div>
-    <div class="detail-row"><div class="detail-label">Deadline</div><div class="detail-val" style="${dc}">${fmtDate(t.deadline)} — ${dlLabel(t.deadline,t.status)}</div></div>
-    <div class="detail-row"><div class="detail-label">Prioridade</div><div class="detail-val">${t.priority==='urgente'?'🔴 Urgente':t.priority==='alta'?'🟡 Alta':'Normal'}</div></div>
-    <div class="detail-row"><div class="detail-label">Criada em</div><div class="detail-val">${new Date(t.createdAt).toLocaleString('pt-BR')}</div></div>`;
-  if(t.description){
-    html+=`<div class="detail-row"><div class="detail-label">Detalhes</div><div class="detail-val">${esc(t.description)}</div></div>`;
-  }
-  if(t.slackMsg?.text){
-    html+=`<div style="margin-top:12px;background:rgba(74,21,75,0.2);border:1px solid rgba(130,10,209,0.25);border-radius:8px;padding:12px">
-      <div style="font-size:11px;font-weight:700;color:var(--nu-purple);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">💬 Mensagem Original do Slack</div>
-      ${t.slackMsg.from?`<div style="font-size:11px;color:var(--nu-text-muted);margin-bottom:5px">De: ${esc(t.slackMsg.from)}${t.slackMsg.channel?' · #'+esc(t.slackMsg.channel):''}</div>`:''}
-      <div style="font-size:12px;color:var(--nu-text-sec);line-height:1.5;white-space:pre-wrap">${esc(t.slackMsg.text)}</div>
-    </div>`;
-  }
-  document.getElementById('detailBody').innerHTML=html;
-  document.getElementById('detailBg').classList.add('show');
-}
+    function render() {
+      updateStats();
+      renderKanban();
+      updateCharts();
+    }
 
-function closeDetail() { document.getElementById('detailBg').classList.remove('show'); }
-function editFromDetail() { openEditModal(detailTaskId); }
+    function updateStats() {
+      const filtered = getFilteredTasks();
+      document.getElementById('stat-total').textContent = filtered.length;
+      document.getElementById('stat-pending').textContent = filtered.filter(t => t.status === 'pending').length;
+      document.getElementById('stat-wip').textContent = filtered.filter(t => t.status === 'wip').length;
+      document.getElementById('stat-done').textContent = filtered.filter(t => t.status === 'done').length;
+      document.getElementById('stat-cancel').textContent = filtered.filter(t => t.status === 'cancel').length;
+    }
 
-// ─── TASK ACTIONS ────────────────────────────────────────────────────────────
-function delTask(id) {
-  if(!confirm('Excluir esta tarefa?')) return;
-  tasks=tasks.filter(t=>t.id!==id);
-  save(); render(); showToast('🗑️ Tarefa excluída');
-}
+    function getFilteredTasks() {
+      return tasks.filter(t => {
+        const personMatch = !currentFilter.person || t.assignee === currentFilter.person;
+        const priorityMatch = !currentFilter.priority || t.priority === currentFilter.priority;
+        return personMatch && priorityMatch;
+      });
+    }
 
-let ctxX=0, ctxY=0;
-function openCtx(e, id) {
-  e.preventDefault(); e.stopPropagation();
-  ctxTaskId=id;
-  const m=document.getElementById('ctxMenu');
-  m.style.left=Math.min(e.clientX,window.innerWidth-170)+'px';
-  m.style.top=Math.min(e.clientY,window.innerHeight-160)+'px';
-  m.classList.add('show');
-}
-function moveTask(status) {
-  const t=tasks.find(x=>x.id===ctxTaskId);
-  if(t){
-    t.status=status;
-    t.finishedAt=(status==='done')?new Date().toISOString():null;
-    save(); render();
-    showToast('✅ Tarefa movida!');
-  }
-  document.getElementById('ctxMenu').classList.remove('show');
-}
+    function renderKanban() {
+      const cols = { pending: 'col-pending', wip: 'col-wip', done: 'col-done', cancel: 'col-cancel' };
+      Object.values(cols).forEach(id => document.getElementById(id).innerHTML = '');
 
-// ─── SLACK INTEGRATION ───────────────────────────────────────────────────────
-// This function calls the Claude MCP tool to search Slack.
-// In the standalone HTML file, it uses a built-in keyword extraction fallback.
-// The actual Slack search is handled by Claude when run in Cowork mode.
+      const filtered = getFilteredTasks();
+      const isToday = (date) => new Date(date).toDateString() === new Date().toDateString();
+      const isPast = (date) => new Date(date) < new Date() && !isToday(date);
 
-async function searchSlack() {
-  const channel = document.getElementById('slackChannel').value.trim();
-  const keyword = document.getElementById('slackKeyword').value.trim();
-  const limit = parseInt(document.getElementById('slackLimit').value);
-  const btn = document.getElementById('btnSlackSearch');
-  const results = document.getElementById('slackResults');
+      filtered.forEach(t => {
+        const col = document.getElementById(cols[t.status]);
+        const isOverdue = isPast(t.deadline);
+        const card = document.createElement('div');
+        card.className = `kanban-card ${isOverdue ? 'overdue' : ''}`;
+        card.onclick = () => showDetails(t.id);
 
-  if (!channel && !keyword) {
-    results.innerHTML = '<div class="empty-slack">Por favor, informe um canal ou palavra-chave.</div>';
-    return;
-  }
+        const priorityClass = `badge-priority-${t.priority}`;
+        const deadlineStr = new Date(t.deadline).toLocaleDateString('pt-BR');
 
-  btn.disabled = true;
-  btn.innerHTML = '<div class="converting-spinner"></div> Buscando...';
-  results.innerHTML = '<div class="empty-slack">🔍 Buscando mensagens no Slack...</div>';
+        card.innerHTML = `
+          <div class="kanban-card-title">${t.title}</div>
+          <div class="kanban-card-info">${t.assignee} • ${deadlineStr}</div>
+          <div class="kanban-card-meta">
+            <span class="badge ${priorityClass}">${t.priority.toUpperCase()}</span>
+          </div>
+          <select class="k-status-select st-${t.status}" onclick="event.stopPropagation()" onchange="changeStatus('${t.id}',this)">
+            <option value="pending"${t.status==='pending'?' selected':''}>⏳ Sem Iniciar</option>
+            <option value="wip"${t.status==='wip'?' selected':''}>🔄 Em Andamento</option>
+            <option value="done"${t.status==='done'?' selected':''}>✅ Concluída</option>
+            <option value="cancel"${t.status==='cancel'?' selected':''}>✖️ Cancelada</option>
+          </select>
+        `;
 
-  // Signal to Claude (via postMessage) to perform the Slack search
-  // When embedded in Cowork, Claude intercepts this and calls the MCP tool
-  try {
-    window.parent.postMessage({
-      type: 'CLAUDE_SLACK_SEARCH',
-      channel, keyword, limit
-    }, '*');
+        col.appendChild(card);
+      });
+    }
 
-    // Listen for response
-    const handler = (ev) => {
-      if (ev.data?.type === 'CLAUDE_SLACK_RESULT') {
-        window.removeEventListener('message', handler);
-        clearTimeout(timeout);
-        btn.disabled=false; btn.innerHTML='🔍 Buscar';
-        renderSlackResults(ev.data.messages || []);
+    function changeStatus(id, sel) {
+      const t = tasks.find(x => x.id === id);
+      if (!t) return;
+      const status = sel.value;
+      t.status = status;
+      t.finishedAt = (status === 'done') ? new Date().toISOString() : null;
+      sel.className = 'k-status-select st-' + status;
+      save();
+      render();
+      const msgs = { done: '✅ Concluída!', wip: '🔄 Em andamento!', cancel: '✖️ Cancelada', pending: '⏳ Sem iniciar' };
+      showToast(msgs[status]);
+    }
+
+    function applyFilters() {
+      currentFilter.person = document.getElementById('filter-person').value;
+      render();
+    }
+
+    function setPriority(p, btn) {
+      document.querySelectorAll('.priority-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter.priority = p;
+      render();
+    }
+
+    function switchView(view) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+
+      document.getElementById('kanban-view').classList.remove('active');
+      document.getElementById('search-view').classList.remove('active');
+      document.getElementById('charts-view').classList.remove('active');
+
+      if (view === 'kanban') document.getElementById('kanban-view').classList.add('active');
+      else if (view === 'search') {
+        document.getElementById('search-view').classList.add('active');
+      } else if (view === 'charts') {
+        document.getElementById('charts-view').classList.add('active');
+        setTimeout(updateCharts, 100);
       }
-    };
-    window.addEventListener('message', handler);
-
-    // Timeout fallback
-    const timeout = setTimeout(() => {
-      window.removeEventListener('message', handler);
-      btn.disabled=false; btn.innerHTML='🔍 Buscar';
-      results.innerHTML = '<div class="empty-slack">⚠️ Use este painel diretamente no Claude Cowork para buscar mensagens reais do Slack. Peça ao Claude: "busca mensagens do canal #wx-2-0-new-team".</div>';
-    }, 4000);
-
-  } catch(err) {
-    btn.disabled=false; btn.innerHTML='🔍 Buscar';
-    results.innerHTML = '<div class="empty-slack">⚠️ Use este painel diretamente no Claude Cowork para buscar mensagens reais do Slack.</div>';
-  }
-}
-
-function renderSlackResultsDemo(channel, keyword) {
-  // Demo messages for when running standalone (without Claude)
-  const demoMsgs = [
-    {
-      from:'Sheila',
-      ts: new Date().toISOString(),
-      channel: channel||'workplace-experience',
-      text:`@Pedro por favor verificar a manutenção do ar condicionado do andar 3. Preciso que esteja resolvido até sexta-feira ${getFutureDate(5)}.`
-    },
-    {
-      from:'Carla',
-      ts: new Date(Date.now()-3600000).toISOString(),
-      channel: channel||'workplace-experience',
-      text:`Alguém pode organizar a cotação dos novos móveis para o andar 7? Deadline: ${getFutureDate(10)}. Responsável: Juliana`
-    },
-    {
-      from:'Rafael',
-      ts: new Date(Date.now()-7200000).toISOString(),
-      channel: channel||'workplace-experience',
-      text:`Precisamos revisar o contrato do prestador de limpeza. @Pedro pode fazer isso até ${getFutureDate(7)}?`
-    },
-    {
-      from:'Juliana',
-      ts: new Date(Date.now()-86400000).toISOString(),
-      channel: channel||'workplace-experience',
-      text:`Lembrete: o relatório de ocupação mensal precisa estar pronto até ${getFutureDate(3)}. Sheila, você consegue fazer?`
-    },
-  ];
-
-  const filtered = keyword
-    ? demoMsgs.filter(m => m.text.toLowerCase().includes(keyword.toLowerCase()) ||
-        m.from.toLowerCase().includes(keyword.toLowerCase()))
-    : demoMsgs;
-
-  renderSlackResults(filtered, true);
-}
-
-function getFutureDate(days) {
-  const d = new Date(); d.setDate(d.getDate()+days);
-  return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
-}
-
-function renderSlackResults(msgs, isDemo) {
-  const container = document.getElementById('slackResults');
-  if (!msgs.length) {
-    container.innerHTML = '<div class="empty-slack">Nenhuma mensagem encontrada.</div>';
-    return;
-  }
-
-  const note = isDemo
-    ? `<div style="font-size:11px;color:var(--nu-text-muted);margin-bottom:10px;padding:8px 12px;background:rgba(255,255,255,0.04);border-radius:6px">
-        📌 Modo demonstração — conecte ao Slack via Claude Cowork para buscar mensagens reais.
-       </div>`
-    : '';
-
-  container.innerHTML = note + msgs.map((msg,i) => {
-    const ts = msg.ts ? new Date(msg.ts).toLocaleString('pt-BR') : '';
-    return `<div class="slack-msg" id="smsg-${i}">
-      <div class="slack-msg-header">
-        <span class="slack-msg-from">💬 ${esc(msg.from||'Desconhecido')}</span>
-        <span class="slack-msg-time">${ts}</span>
-      </div>
-      <div class="slack-msg-text" id="smsg-text-${i}">${esc(msg.text)}</div>
-      <div class="slack-msg-actions">
-        <button class="btn-convert" onclick="convertSlackMsg(${i})">
-          ✨ Converter em Tarefa
-        </button>
-        <button class="btn-expand" onclick="toggleExpand(${i})">Ver mais</button>
-      </div>
-      <div id="smsg-extract-${i}"></div>
-    </div>`;
-  }).join('');
-
-  // Store messages for reference
-  window._slackMsgs = msgs;
-}
-
-function toggleExpand(i) {
-  const el = document.getElementById(`smsg-text-${i}`);
-  el.classList.toggle('expanded');
-}
-
-function convertSlackMsg(i) {
-  const msg = window._slackMsgs[i];
-  if (!msg) return;
-
-  // Show spinner in extract area
-  const extractEl = document.getElementById(`smsg-extract-${i}`);
-  extractEl.innerHTML = `<div class="ai-extract"><div class="ai-extract-title">✨ Extraindo com IA...</div>
-    <div style="display:flex;align-items:center;gap:8px;color:var(--nu-text-sec);font-size:12px">
-      <div class="converting-spinner"></div> Analisando mensagem...
-    </div></div>`;
-
-  // Parse deadline and assignee from text
-  setTimeout(() => {
-    const extracted = extractTaskFromText(msg.text, msg.from);
-    extractEl.innerHTML = `<div class="ai-extract">
-      <div class="ai-extract-title">✨ Campos Extraídos pela IA</div>
-      <div class="ai-field-row">
-        <span class="ai-field-label">Tarefa</span>
-        <input class="ai-field-input" id="ext-title-${i}" value="${esc(extracted.title)}">
-      </div>
-      <div class="ai-field-row">
-        <span class="ai-field-label">Responsável</span>
-        <input class="ai-field-input" id="ext-assignee-${i}" value="${esc(extracted.assignee)}">
-      </div>
-      <div class="ai-field-row">
-        <span class="ai-field-label">Deadline</span>
-        <input class="ai-field-input" type="date" id="ext-deadline-${i}" value="${extracted.deadline}">
-      </div>
-      <div class="ai-field-row">
-        <span class="ai-field-label">Prioridade</span>
-        <select class="ai-field-select" id="ext-priority-${i}">
-          <option value="normal"${extracted.priority==='normal'?' selected':''}>Normal</option>
-          <option value="alta"${extracted.priority==='alta'?' selected':''}>Alta</option>
-          <option value="urgente"${extracted.priority==='urgente'?' selected':''}>Urgente</option>
-        </select>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <button class="btn-convert" onclick="createFromSlack(${i},'${esc(msg.text).replace(/'/g,'&#39;')}','${esc(msg.from||'')}','${esc(msg.channel||'')}','${esc(msg.ts||'')}')">
-          ✅ Criar Tarefa
-        </button>
-        <button class="btn-expand" onclick="document.getElementById('smsg-extract-${i}').innerHTML=''">Cancelar</button>
-      </div>
-    </div>`;
-  }, 700);
-}
-
-function extractTaskFromText(text, from) {
-  // Smart extraction: looks for dates, names, task verbs
-  let title = text.length > 80 ? text.substring(0,80)+'…' : text;
-  let assignee = '';
-  let deadline = '';
-  let priority = 'normal';
-
-  // Extract assignee from @mentions or "Responsável:" patterns
-  const atMatch = text.match(/@(\w+)/);
-  const respMatch = text.match(/responsável[:\s]+([A-ZÀ-Úa-zà-ú]+)/i);
-  const podeMatch = text.match(/([A-ZÀ-Ú][a-zà-ú]+),?\s+(?:você|pode|consegue)/);
-  if (respMatch) assignee = respMatch[1];
-  else if (podeMatch) assignee = podeMatch[1];
-  else if (atMatch && atMatch[1].toLowerCase() !== from?.toLowerCase()) assignee = atMatch[1];
-  else assignee = from || '';
-
-  // Extract deadline: DD/MM/YYYY, "até sexta", "até dia X", "prazo: X dias"
-  const dateMatch = text.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4}|\d{2})/);
-  const untilMatch = text.match(/até[:\s]+(\d{1,2})\s*(?:de\s*)?(?:jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez|\d{1,2})/i);
-  const weekMatch = text.match(/(?:até\s*)?(segunda|terça|quarta|quinta|sexta|sábado|domingo)/i);
-  const daysMatch = text.match(/(\d+)\s*dias/i);
-
-  if (dateMatch) {
-    const [,d,m,y] = dateMatch;
-    const fullYear = y.length===2 ? '20'+y : y;
-    deadline = `${fullYear}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
-  } else if (weekMatch) {
-    const weekdays={segunda:1,terça:2,quarta:3,quinta:4,sexta:5,sábado:6,domingo:0};
-    const target=weekdays[weekMatch[1].toLowerCase()];
-    const d=new Date(); let diff=(target-d.getDay()+7)%7||7;
-    d.setDate(d.getDate()+diff);
-    deadline=d.toISOString().split('T')[0];
-  } else if (daysMatch) {
-    const d=new Date(); d.setDate(d.getDate()+parseInt(daysMatch[1]));
-    deadline=d.toISOString().split('T')[0];
-  } else {
-    // Default: 7 days
-    const d=new Date(); d.setDate(d.getDate()+7);
-    deadline=d.toISOString().split('T')[0];
-  }
-
-  // Urgency
-  if(/urgent|urgent|imediato|hoje|asap|agora/i.test(text)) priority='urgente';
-  else if(/priorit|importante|precis|logo/i.test(text)) priority='alta';
-
-  // Clean title
-  title = text.replace(/@\w+/g,'').replace(/\s+/g,' ').trim();
-  if(title.length > 100) title = title.substring(0,100)+'…';
-
-  return { title, assignee, deadline, priority };
-}
-
-function createFromSlack(i, slackText, from, channel, ts) {
-  const title = document.getElementById(`ext-title-${i}`)?.value.trim();
-  const assignee = document.getElementById(`ext-assignee-${i}`)?.value.trim();
-  const deadline = document.getElementById(`ext-deadline-${i}`)?.value;
-  const priority = document.getElementById(`ext-priority-${i}`)?.value;
-
-  if (!title || !assignee || !deadline) {
-    openAddModal({
-      title, assignee, deadline, priority,
-      slackText: decodeURIComponent(slackText.replace(/&#39;/g,"'")),
-      from, channel, ts
-    });
-    return;
-  }
-
-  tasks.push({
-    id: uid(),
-    title, description: '',
-    assignee, deadline, priority,
-    status: 'pending',
-    createdAt: new Date().toISOString(),
-    finishedAt: null,
-    slackMsg: {
-      text: slackText.replace(/&#39;/g,"'"),
-      from, channel, ts
     }
-  });
-  save(); render();
-  showToast('🎉 Tarefa criada a partir do Slack!');
 
-  // Remove message card from list
-  const card = document.getElementById(`smsg-${i}`);
-  if(card) { card.style.opacity='0.4'; card.style.pointerEvents='none'; }
-}
+    function searchSlack() {
+      const q = document.getElementById('search-input').value.toLowerCase();
+      const results = document.getElementById('search-results');
+      results.innerHTML = '';
 
-// ─── DOWNLOAD ────────────────────────────────────────────────────────────────
-function downloadDashboard() {
-  const html = '<!DOCTYPE html>' + document.documentElement.outerHTML;
-  const blob = new Blob([html], {type:'text/html'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'workplace_dashboard.html';
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
+      if (!q) return;
 
-// ─── GLOBAL EVENTS ───────────────────────────────────────────────────────────
-document.addEventListener('click', ()=>document.getElementById('ctxMenu').classList.remove('show'));
-document.addEventListener('keydown', e=>{
-  if(e.key==='Escape'){
-    closeModal();
-    closeDetail();
-    document.getElementById('ctxMenu').classList.remove('show');
-  }
-  if(e.key==='n' && document.activeElement.tagName!=='INPUT' && document.activeElement.tagName!=='TEXTAREA'){
-    e.preventDefault(); openAddModal();
-  }
-});
+      const matches = tasks.filter(t => 
+        t.title.toLowerCase().includes(q) || 
+        t.slackMsg.from.toLowerCase().includes(q) ||
+        t.slackMsg.channel.toLowerCase().includes(q)
+      );
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
-render();
-</script>
+      if (matches.length === 0) {
+        results.innerHTML = '<div style="text-align: center; padding: 40px; color: rgba(244,234,250,0.5);">Nenhuma tarefa encontrada</div>';
+        return;
+      }
+
+      matches.forEach(t => {
+        const item = document.createElement('div');
+        item.className = 'search-result-item';
+        item.onclick = () => showDetails(t.id);
+        item.innerHTML = `
+          <div style="font-weight: 600; margin-bottom: 4px;">${t.title}</div>
+          <div style="font-size: 12px; color: rgba(244,234,250,0.6); margin-bottom: 8px;">
+            ${t.assignee} • ${new Date(t.deadline).toLocaleDateString('pt-BR')}
+          </div>
+          <div style="font-size: 11px; color: #820AD1;">
+            💬 ${t.slackMsg.from} in #${t.slackMsg.channel}
+          </div>
+        `;
+        results.appendChild(item);
+      });
+    }
+
+    function updateCharts() {
+      const chartCanvas = document.getElementById('chart-stacked');
+      const donutCanvas = document.getElementById('chart-donut');
+      if (!chartCanvas || !donutCanvas) return;
+
+      const people = ['Wlisses', 'Sheila'];
+      const statuses = ['pending', 'wip', 'done', 'cancel'];
+      const statusLabels = { pending: 'Sem Iniciar', wip: 'Em And.', done: 'Concluídas', cancel: 'Canceladas' };
+      const statusColors = {
+        pending: 'rgba(176,143,212,0.6)',
+        wip: 'rgba(255,214,0,0.6)',
+        done: 'rgba(0,200,83,0.6)',
+        cancel: 'rgba(255,76,76,0.6)'
+      };
+
+      const stackedData = statuses.map(s => ({
+        label: statusLabels[s],
+        data: people.map(p => tasks.filter(t => t.assignee === p && t.status === s).length),
+        backgroundColor: statusColors[s]
+      }));
+
+      new Chart(chartCanvas, {
+        type: 'bar',
+        data: { labels: people, datasets: stackedData },
+        options: {
+          responsive: true,
+          scales: { x: { stacked: true }, y: { stacked: true } },
+          plugins: { legend: { labels: { color: '#F4EAFA' } } }
+        }
+      });
+
+      const statusTotals = statuses.map(s => tasks.filter(t => t.status === s).length);
+      new Chart(donutCanvas, {
+        type: 'doughnut',
+        data: {
+          labels: statuses.map(s => statusLabels[s]),
+          datasets: [{
+            data: statusTotals,
+            backgroundColor: Object.values(statusColors)
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { labels: { color: '#F4EAFA' } } }
+        }
+      });
+
+      const tbody = document.querySelector('#summary-table tbody');
+      tbody.innerHTML = '';
+      people.forEach(p => {
+        const row = tbody.insertRow();
+        const personTasks = tasks.filter(t => t.assignee === p);
+        row.insertCell(0).textContent = p;
+        row.insertCell(1).textContent = personTasks.filter(t => t.status === 'pending').length;
+        row.insertCell(2).textContent = personTasks.filter(t => t.status === 'wip').length;
+        row.insertCell(3).textContent = personTasks.filter(t => t.status === 'done').length;
+        row.insertCell(4).textContent = personTasks.filter(t => t.status === 'cancel').length;
+        row.insertCell(5).textContent = personTasks.length;
+      });
+    }
+
+    function openAddModal() {
+      currentEditId = null;
+      document.getElementById('modal-title').textContent = 'Nova Tarefa';
+      document.getElementById('task-title').value = '';
+      document.getElementById('task-description').value = '';
+      document.getElementById('task-assignee').value = '';
+      document.getElementById('task-deadline').value = '';
+      document.getElementById('task-priority').value = 'normal';
+      document.getElementById('task-status').value = 'pending';
+      document.getElementById('task-modal').classList.add('active');
+    }
+
+    function saveTask(e) {
+      e.preventDefault();
+      if (currentEditId) {
+        const t = tasks.find(x => x.id === currentEditId);
+        if (t) {
+          t.title = document.getElementById('task-title').value;
+          t.description = document.getElementById('task-description').value;
+          t.assignee = document.getElementById('task-assignee').value;
+          t.deadline = document.getElementById('task-deadline').value;
+          t.priority = document.getElementById('task-priority').value;
+          t.status = document.getElementById('task-status').value;
+        }
+      } else {
+        tasks.push({
+          id: 'task-' + Date.now(),
+          title: document.getElementById('task-title').value,
+          description: document.getElementById('task-description').value,
+          assignee: document.getElementById('task-assignee').value,
+          deadline: document.getElementById('task-deadline').value,
+          priority: document.getElementById('task-priority').value,
+          status: document.getElementById('task-status').value,
+          createdAt: new Date().toISOString(),
+          finishedAt: null,
+          slackMsg: { from: 'Manual', channel: 'dashboard', ts: Date.now().toString() }
+        });
+      }
+      save();
+      render();
+      closeModal('task-modal');
+      showToast('Tarefa salva com sucesso!');
+    }
+
+    function showDetails(id) {
+      const t = tasks.find(x => x.id === id);
+      if (!t) return;
+      const deadlineStr = new Date(t.deadline).toLocaleDateString('pt-BR');
+      const createdStr = new Date(t.createdAt).toLocaleDateString('pt-BR');
+      document.getElementById('details-title').textContent = t.title;
+      document.getElementById('details-content').innerHTML = `
+        <div style="display: grid; gap: 16px;">
+          <div>
+            <div style="font-size: 11px; color: rgba(244,234,250,0.6); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Descrição</div>
+            <div style="font-size: 13px;">${t.description || 'Sem descrição'}</div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <div style="font-size: 11px; color: rgba(244,234,250,0.6); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Atribuído a</div>
+              <div style="font-size: 13px;">${t.assignee}</div>
+            </div>
+            <div>
+              <div style="font-size: 11px; color: rgba(244,234,250,0.6); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Prazo</div>
+              <div style="font-size: 13px;">${deadlineStr}</div>
+            </div>
+            <div>
+              <div style="font-size: 11px; color: rgba(244,234,250,0.6); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Prioridade</div>
+              <div style="font-size: 13px; text-transform: uppercase;">${t.priority}</div>
+            </div>
+            <div>
+              <div style="font-size: 11px; color: rgba(244,234,250,0.6); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Status</div>
+              <div style="font-size: 13px;">
+                ${t.status === 'pending' ? '⏳ Sem Iniciar' : t.status === 'wip' ? '🔄 Em Andamento' : t.status === 'done' ? '✅ Concluída' : '✖️ Cancelada'}
+              </div>
+            </div>
+          </div>
+          <div class="slack-history">
+            <div style="font-size: 12px; font-weight: 600; margin-bottom: 8px; color: #820AD1;">📌 Origem Slack</div>
+            <div class="slack-from">${t.slackMsg.from}</div>
+            <div class="slack-message">Mensagem vinculada em #${t.slackMsg.channel}</div>
+            <div class="slack-channel">ts: ${t.slackMsg.ts}</div>
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 16px;">
+            <button class="btn-save" onclick="editTask('${t.id}')">Editar</button>
+            <button class="btn-cancel" onclick="closeModal('details-modal')">Fechar</button>
+          </div>
+        </div>
+      `;
+      document.getElementById('details-modal').classList.add('active');
+    }
+
+    function editTask(id) {
+      const t = tasks.find(x => x.id === id);
+      if (!t) return;
+      currentEditId = id;
+      document.getElementById('modal-title').textContent = 'Editar Tarefa';
+      document.getElementById('task-title').value = t.title;
+      document.getElementById('task-description').value = t.description || '';
+      document.getElementById('task-assignee').value = t.assignee;
+      document.getElementById('task-deadline').value = t.deadline;
+      document.getElementById('task-priority').value = t.priority;
+      document.getElementById('task-status').value = t.status;
+      closeModal('details-modal');
+      document.getElementById('task-modal').classList.add('active');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => toast.style.display = 'none', 3000);
+    }
+
+    function downloadData() {
+      const json = JSON.stringify(tasks, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'tarefas_' + new Date().toISOString().split('T')[0] + '.json';
+      a.click();
+      showToast('Dados baixados com sucesso!');
+    }
+
+    // Init
+    load();
+    render();
+
+    // Load Chart.js library
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+    document.head.appendChild(script);
+  </script>
 </body>
 </html>
