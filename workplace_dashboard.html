@@ -678,6 +678,354 @@
       padding: 14px 20px;
       border-radius: 6px;
       font-size: 13px;
+      font-weigh   }
+
+    .badge-priority-normal {
+      background: rgba(176, 143, 212, 0.15);
+      color: #B08FD4;
+    }
+
+    .k-status-select {
+      font-size: 11px;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-family: inherit;
+      margin-top: 8px;
+      width: 100%;
+      transition: all 0.2s;
+    }
+
+    .k-status-select:focus {
+      outline: none;
+    }
+
+    .k-status-select.st-pending {
+      background: rgba(176, 143, 212, 0.15);
+      color: #B08FD4;
+    }
+
+    .k-status-select.st-wip {
+      background: rgba(255, 214, 0, 0.15);
+      color: #FFD600;
+    }
+
+    .k-status-select.st-done {
+      background: rgba(0, 200, 83, 0.15);
+      color: #00C853;
+    }
+
+    .k-status-select.st-cancel {
+      background: rgba(255, 76, 76, 0.12);
+      color: #FF4C4C;
+    }
+
+    .k-status-select option {
+      background: #1A0533;
+      color: #F4EAFA;
+    }
+
+    /* Search View */
+    .search-view {
+      display: none;
+    }
+
+    .search-view.active {
+      display: block;
+    }
+
+    .search-container {
+      background: #1A0533;
+      border: 1px solid rgba(130, 10, 209, 0.2);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .search-input {
+      width: 100%;
+      max-width: 400px;
+      background: #1F0740;
+      border: 1px solid rgba(130, 10, 209, 0.2);
+      color: #F4EAFA;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #820AD1;
+    }
+
+    .search-results {
+      display: grid;
+      gap: 12px;
+    }
+
+    .search-result-item {
+      background: #1A0533;
+      border: 1px solid rgba(130, 10, 209, 0.2);
+      border-radius: 8px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .search-result-item:hover {
+      border-color: #820AD1;
+    }
+
+    /* Charts View */
+    .charts-view {
+      display: none;
+    }
+
+    .charts-view.active {
+      display: block;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .chart-container {
+      background: #1A0533;
+      border: 1px solid rgba(130, 10, 209, 0.2);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .chart-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #F4EAFA;
+    }
+
+    canvas {
+      max-width: 100%;
+    }
+
+    .table-container {
+      background: #1A0533;
+      border: 1px solid rgba(130, 10, 209, 0.2);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: rgba(130, 10, 209, 0.1);
+    }
+
+    th {
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      color: rgba(244, 234, 250, 0.6);
+      border-bottom: 1px solid rgba(130, 10, 209, 0.2);
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(130, 10, 209, 0.15);
+      font-size: 13px;
+    }
+
+    tbody tr:hover {
+      background: rgba(130, 10, 209, 0.05);
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(13, 0, 26, 0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #1A0533;
+      border: 1px solid rgba(130, 10, 209, 0.3);
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: rgba(244, 234, 250, 0.6);
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      color: #F4EAFA;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(244, 234, 250, 0.6);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    select {
+      width: 100%;
+      background: #1F0740;
+      border: 1px solid rgba(130, 10, 209, 0.2);
+      color: #F4EAFA;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: #820AD1;
+    }
+
+    textarea {
+      width: 100%;
+      background: #1F0740;
+      border: 1px solid rgba(130, 10, 209, 0.2);
+      color: #F4EAFA;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #820AD1;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 24px;
+    }
+
+    .btn-cancel {
+      padding: 10px 20px;
+      background: transparent;
+      border: 1px solid rgba(130, 10, 209, 0.3);
+      color: rgba(244, 234, 250, 0.7);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-cancel:hover {
+      border-color: #820AD1;
+      color: #F4EAFA;
+    }
+
+    .btn-save {
+      padding: 10px 20px;
+      background: #820AD1;
+      border: none;
+      color: #FFF;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-save:hover {
+      background: #9D1FE6;
+    }
+
+    /* Details Modal */
+    .slack-history {
+      background: rgba(130, 10, 209, 0.1);
+      border: 1px solid rgba(130, 10, 209, 0.2);
+      border-radius: 6px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .slack-message {
+      font-size: 12px;
+      color: rgba(244, 234, 250, 0.8);
+      line-height: 1.6;
+    }
+
+    .slack-from {
+      font-weight: 600;
+      color: #820AD1;
+      margin-bottom: 4px;
+    }
+
+    .slack-channel {
+      font-size: 11px;
+      color: rgba(244, 234, 250, 0.5);
+      margin-top: 8px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #820AD1;
+      color: #FFF;
+      padding: 14px 20px;
+      border-radius: 6px;
+      font-size: 13px;
       font-weight: 600;
       box-shadow: 0 8px 24px rgba(130, 10, 209, 0.3);
       animation: slide-in 0.3s ease-out;
@@ -715,18 +1063,18 @@
     <div class="header">
       <div class="header-left">
         <div class="logo">
-          <div class="logo-icon">ð</div>
+          <div class="logo-icon">📊</div>
           Workplace Experience
         </div>
         <div class="tabs">
           <button class="tab active" onclick="switchView('kanban')">Kanban</button>
-          <button class="tab" onclick="switchView('search')">Slack â Tarefas</button>
-          <button class="tab" onclick="switchView('charts')">GrÃ¡ficos</button>
+          <button class="tab" onclick="switchView('search')">Slack → Tarefas</button>
+          <button class="tab" onclick="switchView('charts')">Gráficos</button>
         </div>
       </div>
       <div class="header-right">
         <button class="btn btn-primary" onclick="openAddModal()">+ Nova Tarefa</button>
-        <button class="btn btn-secondary" onclick="downloadData()">â¬ï¸ Baixar</button>
+        <button class="btn btn-secondary" onclick="downloadData()">⬇️ Baixar</button>
       </div>
     </div>
 
@@ -748,7 +1096,7 @@
         </div>
         <div class="stat-card">
           <div class="stat-value" id="stat-done">0</div>
-          <div class="stat-label">ConcluÃ­das</div>
+          <div class="stat-label">Concluídas</div>
         </div>
         <div class="stat-card">
           <div class="stat-value" id="stat-cancel">0</div>
@@ -759,7 +1107,7 @@
       <!-- Filters -->
       <div class="filters">
         <div class="filter-group">
-          <label class="filter-label">AtribuÃ­do a:</label>
+          <label class="filter-label">Atribuído a:</label>
           <select class="filter-select" id="filter-person" onchange="applyFilters()">
             <option value="">Todos</option>
             <option value="Wlisses">Wlisses</option>
@@ -770,8 +1118,8 @@
           <label class="filter-label">Prioridade:</label>
           <div class="priority-buttons">
             <button class="priority-btn active" data-priority="" onclick="setPriority('', this)">Todos</button>
-            <button class="priority-btn" data-priority="urgente" onclick="setPriority('urgente', this)">ð¥ Urgente</button>
-            <button class="priority-btn" data-priority="alta" onclick="setPriority('alta', this)">â¡ Alta</button>
+            <button class="priority-btn" data-priority="urgente" onclick="setPriority('urgente', this)">🔥 Urgente</button>
+            <button class="priority-btn" data-priority="alta" onclick="setPriority('alta', this)">⚡ Alta</button>
             <button class="priority-btn" data-priority="normal" onclick="setPriority('normal', this)">Normal</button>
           </div>
         </div>
@@ -780,19 +1128,19 @@
       <!-- Kanban View -->
       <div class="kanban-container active" id="kanban-view">
         <div class="kanban-column">
-          <div class="kanban-column-title">â³ Sem Iniciar</div>
+          <div class="kanban-column-title">⏳ Sem Iniciar</div>
           <div class="kanban-cards" id="col-pending"></div>
         </div>
         <div class="kanban-column">
-          <div class="kanban-column-title">ð Em Andamento</div>
+          <div class="kanban-column-title">🔄 Em Andamento</div>
           <div class="kanban-cards" id="col-wip"></div>
         </div>
         <div class="kanban-column">
-          <div class="kanban-column-title">â ConcluÃ­das</div>
+          <div class="kanban-column-title">✅ Concluídas</div>
           <div class="kanban-cards" id="col-done"></div>
         </div>
         <div class="kanban-column">
-          <div class="kanban-column-title">âï¸ Canceladas</div>
+          <div class="kanban-column-title">✖️ Canceladas</div>
           <div class="kanban-cards" id="col-cancel"></div>
         </div>
       </div>
@@ -813,7 +1161,7 @@
             <canvas id="chart-stacked"></canvas>
           </div>
           <div class="chart-container">
-            <div class="chart-title">DistribuiÃ§Ã£o de Status</div>
+            <div class="chart-title">Distribuição de Status</div>
             <canvas id="chart-donut"></canvas>
           </div>
         </div>
@@ -825,7 +1173,7 @@
                 <th>Pessoa</th>
                 <th>Sem Iniciar</th>
                 <th>Em Andamento</th>
-                <th>ConcluÃ­das</th>
+                <th>Concluídas</th>
                 <th>Canceladas</th>
                 <th>Total</th>
               </tr>
@@ -842,19 +1190,19 @@
     <div class="modal-content">
       <div class="modal-header">
         <span id="modal-title">Nova Tarefa</span>
-        <button class="modal-close" onclick="closeModal('task-modal')">Ã</button>
+        <button class="modal-close" onclick="closeModal('task-modal')">×</button>
       </div>
       <form onsubmit="saveTask(event)">
         <div class="form-group">
-          <label class="form-label">TÃ­tulo</label>
+          <label class="form-label">Título</label>
           <input type="text" id="task-title" required>
         </div>
         <div class="form-group">
-          <label class="form-label">DescriÃ§Ã£o</label>
+          <label class="form-label">Descrição</label>
           <textarea id="task-description"></textarea>
         </div>
         <div class="form-group">
-          <label class="form-label">AtribuÃ­do a:</label>
+          <label class="form-label">Atribuído a:</label>
           <select id="task-assignee" required>
             <option value="">Selecione</option>
             <option value="Wlisses">Wlisses</option>
@@ -876,10 +1224,10 @@
         <div class="form-group">
           <label class="form-label">Status</label>
           <select id="task-status" required>
-            <option value="pending">â³ Sem Iniciar</option>
-            <option value="wip">ð Em Andamento</option>
-            <option value="done">â ConcluÃ­da</option>
-            <option value="cancel">âï¸ Cancelada</option>
+            <option value="pending">⏳ Sem Iniciar</option>
+            <option value="wip">🔄 Em Andamento</option>
+            <option value="done">✅ Concluída</option>
+            <option value="cancel">✖️ Cancelada</option>
           </select>
         </div>
         <div class="modal-buttons">
@@ -895,7 +1243,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <span id="details-title">Detalhes da Tarefa</span>
-        <button class="modal-close" onclick="closeModal('details-modal')">Ã</button>
+        <button class="modal-close" onclick="closeModal('details-modal')">×</button>
       </div>
       <div id="details-content"></div>
     </div>
@@ -906,7 +1254,7 @@
 
   <script>
     // Data initialization
-    const DATA_VERSION = 'slack-real-v1';
+    const DATA_VERSION = 'slack-real-v2';
     if (localStorage.getItem('nu_tasks_version') !== DATA_VERSION) {
       localStorage.removeItem('nu_tasks_v2');
       localStorage.setItem('nu_tasks_version', DATA_VERSION);
@@ -921,7 +1269,7 @@
       {
         id: 'task-1',
         title: 'Tirar fotos da sala Meteoro, Nubar e Copinha para registro no Confluence',
-        description: 'DocumentaÃ§Ã£o fotogrÃ¡fica das salas para arquivo',
+        description: 'Documentação fotográfica das salas para arquivo',
         assignee: 'Wlisses',
         deadline: '2026-04-08',
         priority: 'alta',
@@ -932,8 +1280,8 @@
       },
       {
         id: 'task-2',
-        title: 'Adicionar sala Meteoro e Nubar no Confluence de eventos (apÃ³s check presencial)',
-        description: 'Atualizar documentaÃ§Ã£o apÃ³s verificaÃ§Ã£o in loco',
+        title: 'Adicionar sala Meteoro e Nubar no Confluence de eventos (após check presencial)',
+        description: 'Atualizar documentação após verificação in loco',
         assignee: 'Sheila',
         deadline: '2026-04-10',
         priority: 'normal',
@@ -957,7 +1305,7 @@
       {
         id: 'task-4',
         title: 'Avaliar planilha das EAs e demais reservas para o Capote 210',
-        description: 'AnÃ¡lise das alocaÃ§Ãµes de recursos',
+        description: 'Análise das alocações de recursos',
         assignee: 'Wlisses',
         deadline: '2026-04-08',
         priority: 'normal',
@@ -969,7 +1317,7 @@
       {
         id: 'task-5',
         title: 'Verificar possibilidade de adicionar etiquetas das agendas Capote 210 no Pipefy',
-        description: 'Explorar integraÃ§Ã£o de rÃ³tulos',
+        description: 'Explorar integração de rótulos',
         assignee: 'Sheila',
         deadline: '2026-04-10',
         priority: 'normal',
@@ -980,8 +1328,8 @@
       },
       {
         id: 'task-6',
-        title: 'Compartilhar fotos dos layouts do Capote com a Oikos para criaÃ§Ã£o do book',
-        description: 'Envio de material fotogrÃ¡fico para produÃ§Ã£o',
+        title: 'Compartilhar fotos dos layouts do Capote com a Oikos para criação do book',
+        description: 'Envio de material fotográfico para produção',
         assignee: 'Wlisses',
         deadline: '2026-04-09',
         priority: 'normal',
@@ -992,8 +1340,8 @@
       },
       {
         id: 'task-7',
-        title: 'Reajuste de acessibilidade/fluxo entre cadeiras â Nuniverse (pÃ³s reabertura julho)',
-        description: 'Melhorias de acessibilidade apÃ³s reabertura',
+        title: 'Reajuste de acessibilidade/fluxo entre cadeiras — Nuniverse (pós reabertura julho)',
+        description: 'Melhorias de acessibilidade após reabertura',
         assignee: 'Wlisses',
         deadline: '2026-07-01',
         priority: 'normal',
@@ -1004,8 +1352,8 @@
       },
       {
         id: 'task-8',
-        title: 'Alinhar detalhes do Coffee Break AniversÃ¡rio Nu 19/05 com Camila Faria (catering, Central Park, tamanho)',
-        description: 'CoordenaÃ§Ã£o de evento de aniversÃ¡rio',
+        title: 'Alinhar detalhes do Coffee Break Aniversário Nu 19/05 com Camila Faria (catering, Central Park, tamanho)',
+        description: 'Coordenação de evento de aniversário',
         assignee: 'Sheila',
         deadline: '2026-04-25',
         priority: 'alta',
@@ -1015,20 +1363,16 @@
         slackMsg: { from: 'Wlisses Araujo', channel: 'wx-2-0-new-team', ts: '1774392509.557119' }
       },
       {
-            "id": "task-1775680044",
-            "title": "FUP Distribuição Sonhos — alinhar horário, quantidade por prédio, apoio na distribuição e forma de exposição",
-            "description": "Wlisses, você pode fazer um FUP com relação a entrega dos sonhos para a próxima semana? Horário e quantidade de sonho por prédio, quem vai poder ajudar na distribuição nas MKs, como os sonhos virão?",
-            "assignee": "Wlisses",
-            "deadline": "2026-04-15",
-            "priority": "normal",
-            "status": "pending",
-            "createdAt": "2026-04-08T21:27:25.017Z",
-            "finishedAt": null,
-            "slackMsg": {
-                  "from": "Sheila Sousa",
-                  "channel": "wx-2-0-new-team",
-                  "ts": "1775680044.302769"
-            }
+        id: 'task-1775680044',
+        title: 'FUP Distribuição Sonhos — alinhar horário, quantidade por prédio, apoio na distribuição e forma de exposição',
+        description: 'Wlisses, você pode fazer um FUP com relação a entrega dos sonhos para a próxima semana? Horário e quantidade de sonho por prédio, quem vai poder ajudar na distribuição nas MKs, como os sonhos virão?',
+        assignee: 'Wlisses',
+        deadline: '2026-04-15',
+        priority: 'normal',
+        status: 'pending',
+        createdAt: '2026-04-08T20:27:24.000Z',
+        finishedAt: null,
+        slackMsg: { from: 'Sheila Sousa', channel: 'wx-2-0-new-team', ts: '1775680044.302769' }
       }
     ];
 
@@ -1094,15 +1438,15 @@
 
         card.innerHTML = `
           <div class="kanban-card-title">${t.title}</div>
-          <div class="kanban-card-info">${t.assignee} â¢ ${deadlineStr}</div>
+          <div class="kanban-card-info">${t.assignee} • ${deadlineStr}</div>
           <div class="kanban-card-meta">
             <span class="badge ${priorityClass}">${t.priority.toUpperCase()}</span>
           </div>
           <select class="k-status-select st-${t.status}" onclick="event.stopPropagation()" onchange="changeStatus('${t.id}',this)">
-            <option value="pending"${t.status==='pending'?' selected':''}>â³ Sem Iniciar</option>
-            <option value="wip"${t.status==='wip'?' selected':''}>ð Em Andamento</option>
-            <option value="done"${t.status==='done'?' selected':''}>â ConcluÃ­da</option>
-            <option value="cancel"${t.status==='cancel'?' selected':''}>âï¸ Cancelada</option>
+            <option value="pending"${t.status==='pending'?' selected':''}>⏳ Sem Iniciar</option>
+            <option value="wip"${t.status==='wip'?' selected':''}>🔄 Em Andamento</option>
+            <option value="done"${t.status==='done'?' selected':''}>✅ Concluída</option>
+            <option value="cancel"${t.status==='cancel'?' selected':''}>✖️ Cancelada</option>
           </select>
         `;
 
@@ -1119,7 +1463,7 @@
       sel.className = 'k-status-select st-' + status;
       save();
       render();
-      const msgs = { done: 'â ConcluÃ­da!', wip: 'ð Em andamento!', cancel: 'âï¸ Cancelada', pending: 'â³ Sem iniciar' };
+      const msgs = { done: '✅ Concluída!', wip: '🔄 Em andamento!', cancel: '✖️ Cancelada', pending: '⏳ Sem iniciar' };
       showToast(msgs[status]);
     }
 
@@ -1177,10 +1521,10 @@
         item.innerHTML = `
           <div style="font-weight: 600; margin-bottom: 4px;">${t.title}</div>
           <div style="font-size: 12px; color: rgba(244,234,250,0.6); margin-bottom: 8px;">
-            ${t.assignee} â¢ ${new Date(t.deadline).toLocaleDateString('pt-BR')}
+            ${t.assignee} • ${new Date(t.deadline).toLocaleDateString('pt-BR')}
           </div>
           <div style="font-size: 11px; color: #820AD1;">
-            ð¬ ${t.slackMsg.from} in #${t.slackMsg.channel}
+            💬 ${t.slackMsg.from} in #${t.slackMsg.channel}
           </div>
         `;
         results.appendChild(item);
@@ -1194,7 +1538,7 @@
 
       const people = ['Wlisses', 'Sheila'];
       const statuses = ['pending', 'wip', 'done', 'cancel'];
-      const statusLabels = { pending: 'Sem Iniciar', wip: 'Em And.', done: 'ConcluÃ­das', cancel: 'Canceladas' };
+      const statusLabels = { pending: 'Sem Iniciar', wip: 'Em And.', done: 'Concluídas', cancel: 'Canceladas' };
       const statusColors = {
         pending: 'rgba(176,143,212,0.6)',
         wip: 'rgba(255,214,0,0.6)',
@@ -1301,12 +1645,12 @@
       document.getElementById('details-content').innerHTML = `
         <div style="display: grid; gap: 16px;">
           <div>
-            <div style="font-size: 11px; color: rgba(244,234,250,0.6); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">DescriÃ§Ã£o</div>
-            <div style="font-size: 13px;">${t.description || 'Sem descriÃ§Ã£o'}</div>
+            <div style="font-size: 11px; color: rgba(244,234,250,0.6); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Descrição</div>
+            <div style="font-size: 13px;">${t.description || 'Sem descrição'}</div>
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
             <div>
-              <div style="font-size: 11px; color: rgba(244,234,250,0.6); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">AtribuÃ­do a</div>
+              <div style="font-size: 11px; color: rgba(244,234,250,0.6); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Atribuído a</div>
               <div style="font-size: 13px;">${t.assignee}</div>
             </div>
             <div>
@@ -1320,12 +1664,12 @@
             <div>
               <div style="font-size: 11px; color: rgba(244,234,250,0.6); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Status</div>
               <div style="font-size: 13px;">
-                ${t.status === 'pending' ? 'â³ Sem Iniciar' : t.status === 'wip' ? 'ð Em Andamento' : t.status === 'done' ? 'â ConcluÃ­da' : 'âï¸ Cancelada'}
+                ${t.status === 'pending' ? '⏳ Sem Iniciar' : t.status === 'wip' ? '🔄 Em Andamento' : t.status === 'done' ? '✅ Concluída' : '✖️ Cancelada'}
               </div>
             </div>
           </div>
           <div class="slack-history">
-            <div style="font-size: 12px; font-weight: 600; margin-bottom: 8px; color: #820AD1;">ð Origem Slack</div>
+            <div style="font-size: 12px; font-weight: 600; margin-bottom: 8px; color: #820AD1;">📌 Origem Slack</div>
             <div class="slack-from">${t.slackMsg.from}</div>
             <div class="slack-message">Mensagem vinculada em #${t.slackMsg.channel}</div>
             <div class="slack-channel">ts: ${t.slackMsg.ts}</div>
