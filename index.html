@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WX Dashboard – Eventos & CSAT</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --nu-purple: #820AD1;
+    --nu-dark: #1A1A2E;
+    --nu-gray: #F5F5F5;
+    --nu-light: #FFFFFF;
+    --nu-text: #2D2D2D;
+    --nu-muted: #6B7280;
+    --nu-green: #00C97B;
+    --nu-red: #FF3860;
+    --nu-orange: #FF8C00;
+    --nu-blue: #3B82F6;
+    --card-radius: 14px;
+    --shadow: 0 2px 16px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #F0EFF5; color: var(--nu-text); }
+
+  .header { background: var(--nu-purple); color: white; padding: 20px 32px; display: flex; align-items: center; gap: 16px; box-shadow: 0 2px 8px rgba(130,10,209,0.3); }
+  .header-logo { width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--nu-purple); font-size: 18px; }
+  .header h1 { font-size: 22px; font-weight: 700; }
+  .header p { font-size: 13px; opacity: 0.85; margin-top: 2px; }
+  .header-meta { margin-left: auto; font-size: 12px; opacity: 0.8; text-align: right; }
+
+  .filters-bar { background: white; padding: 14px 32px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; border-bottom: 1px solid #E5E7EB; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .filter-group { display: flex; align-items: center; gap: 8px; }
+  .filter-label { font-size: 12px; font-weight: 600; color: var(--nu-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  select { border: 1.5px solid #E5E7EB; border-radius: 8px; padding: 6px 12px; font-size: 13px; color: var(--nu-text); background: white; cursor: pointer; outline: none; transition: border-color 0.2s; }
+  select:focus { border-color: var(--nu-purple); }
+  .filter-divider { width: 1px; height: 28px; background: #E5E7EB; }
+
+  .tabs { background: white; padding: 0 32px; border-bottom: 2px solid #E5E7EB; display: flex; gap: 4px; overflow-x: auto; }
+  .tab { padding: 14px 20px; font-size: 14px; font-weight: 600; color: var(--nu-muted); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; white-space: nowrap; }
+  .tab:hover { color: var(--nu-purple); }
+  .tab.active { color: var(--nu-purple); border-bottom-color: var(--nu-purple); }
+
+  .main { padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
+  .kpi-card { background: white; border-radius: var(--card-radius); padding: 20px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+  .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--kpi-color, var(--nu-purple)); }
+  .kpi-label { font-size: 12px; font-weight: 600; color: var(--nu-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .kpi-value { font-size: 32px; font-weight: 800; color: var(--nu-text); margin: 6px 0 2px; line-height: 1; }
+  .kpi-sub { font-size: 12px; color: var(--nu-muted); }
+
+  .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; margin-bottom: 20px; }
+  .chart-card { background: white; border-radius: var(--card-radius); padding: 22px; box-shadow: var(--shadow); }
+  .chart-card.full { grid-column: 1 / -1; }
+  .chart-title { font-size: 14px; font-weight: 700; color: var(--nu-text); margin-bottom: 4px; }
+  .chart-sub { font-size: 12px; color: var(--nu-muted); margin-bottom: 16px; }
+  .chart-wrap canvas { max-height: 280px; }
+  .chart-wrap.tall canvas { max-height: 340px; }
+  .chart-wrap.short canvas { max-height: 200px; }
+
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table th { background: #F9FAFB; padding: 10px 14px; text-align: left; font-weight: 600; color: var(--nu-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #E5E7EB; }
+  .data-table td { padding: 10px 14px; border-bottom: 1px solid #F3F4F6; color: var(--nu-text); }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: #FAFBFF; }
+  .score-bar { display: flex; align-items: center; gap: 8px; }
+  .score-fill { height: 8px; border-radius: 4px; background: var(--nu-purple); }
+  .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge-green { background: #D1FAE5; color: #065F46; }
+  .badge-red { background: #FEE2E2; color: #991B1B; }
+  .badge-yellow { background: #FEF3C7; color: #92400E; }
+  .badge-blue { background: #DBEAFE; color: #1E40AF; }
+
+  .section-title { font-size: 18px; font-weight: 800; color: var(--nu-text); margin-bottom: 6px; }
+  .section-desc { font-size: 13px; color: var(--nu-muted); margin-bottom: 20px; }
+
+  /* Loading state */
+  .loading { text-align: center; padding: 60px; color: var(--nu-muted); font-size: 15px; }
+  .loading span { display: block; font-size: 36px; margin-bottom: 12px; }
+
+  @media (max-width: 768px) {
+    .header { padding: 16px 20px; }
+    .main { padding: 20px 16px; }
+    .tabs { padding: 0 16px; }
+    .filters-bar { padding: 12px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">WX</div>
+  <div>
+    <h1>Dashboard de Eventos & CSAT</h1>
+    <p>Workspace Experience · Nubank</p>
+  </div>
+  <div class="header-meta" id="header-meta">Carregando dados…</div>
+</div>
+
+<div class="filters-bar">
+  <div class="filter-group">
+    <span class="filter-label">Ano</span>
+    <select id="filter-year" onchange="applyFilters()">
+      <option value="all">Todos os anos</option>
+    </select>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <span class="filter-label">País</span>
+    <select id="filter-country" onchange="applyFilters()">
+      <option value="all">Todos os países</option>
+    </select>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <span class="filter-label">Escritório (BR)</span>
+    <select id="filter-hq" onchange="applyFilters()">
+      <option value="all">Todos</option>
+      <option value="HQ1">HQ1</option>
+      <option value="HQ2">HQ2</option>
+      <option value="HQ3">HQ3</option>
+      <option value="Spark">Spark</option>
+      <option value="Casinha">Casinha</option>
+    </select>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('overview', this)">📊 Visão Geral</div>
+  <div class="tab" onclick="switchTab('brazil', this)">🇧🇷 Brasil · Detalhes</div>
+  <div class="tab" onclick="switchTab('time', this)">⏰ Dias & Horários</div>
+  <div class="tab" onclick="switchTab('people', this)">👥 Pessoas & Impacto</div>
+  <div class="tab" onclick="switchTab('csat', this)">⭐ CSAT</div>
+</div>
+
+<div class="main">
+  <div id="tab-overview" class="section active">
+    <p class="section-title">Visão Macro dos Eventos</p>
+    <p class="section-desc">Panorama geral de todos os eventos realizados nos escritórios Nubank ao redor do mundo.</p>
+    <div class="kpi-grid" id="kpi-overview"></div>
+    <div class="charts-grid">
+      <div class="chart-card full">
+        <div class="chart-title">Evolução Mensal de Eventos</div>
+        <div class="chart-sub">Volume de eventos por mês e ano (todos os países)</div>
+        <div class="chart-wrap tall"><canvas id="chart-timeline"></canvas></div>
+      </div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Eventos por País · Ano</div>
+        <div class="chart-sub">Comparativo entre países por ano</div>
+        <div class="chart-wrap"><canvas id="chart-country-year"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Status dos Eventos</div>
+        <div class="chart-sub">Distribuição por fase atual</div>
+        <div class="chart-wrap"><canvas id="chart-status"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Participantes Externos · por Ano</div>
+        <div class="chart-sub">Eventos com e sem público externo</div>
+        <div class="chart-wrap"><canvas id="chart-external"></canvas></div>
+      </div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card full">
+        <div class="chart-title">Top 15 BUs com Mais Eventos</div>
+        <div class="chart-sub">Business Units que mais utilizam os espaços</div>
+        <div class="chart-wrap"><canvas id="chart-bu"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-brazil" class="section">
+    <p class="section-title">Brasil · Detalhamento por Escritório</p>
+    <p class="section-desc">Análise detalhada dos eventos nos escritórios brasileiros — por HQ e espaços.</p>
+    <div class="kpi-grid" id="kpi-brazil"></div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Eventos por Escritório (HQ)</div>
+        <div class="chart-sub">Total acumulado por sede</div>
+        <div class="chart-wrap"><canvas id="chart-hq"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Evolução por HQ ao Longo dos Anos</div>
+        <div class="chart-sub">Como cada escritório cresceu</div>
+        <div class="chart-wrap"><canvas id="chart-hq-year"></canvas></div>
+      </div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card full">
+        <div class="chart-title">Média de Pessoas por Espaço (Brasil)</div>
+        <div class="chart-sub">Capacidade média utilizada por sede</div>
+        <div class="chart-wrap short"><canvas id="chart-people-space"></canvas></div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">CSAT por Espaço · Brasil</div>
+      <div class="chart-sub">Satisfação média e volume de respostas por espaço</div>
+      <div style="overflow-x:auto; margin-top: 8px;">
+        <table class="data-table" id="table-space-csat"></table>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-time" class="section">
+    <p class="section-title">Análise Temporal</p>
+    <p class="section-desc">Padrões de uso dos espaços por dia da semana e horário — útil para planejamento operacional.</p>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Eventos por Dia da Semana</div>
+        <div class="chart-sub">Quais dias concentram mais eventos</div>
+        <div class="chart-wrap"><canvas id="chart-day"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Eventos por Horário de Início</div>
+        <div class="chart-sub">Distribuição ao longo do dia</div>
+        <div class="chart-wrap"><canvas id="chart-hour"></canvas></div>
+      </div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card full">
+        <div class="chart-title">Sazonalidade: Volume por Mês e Ano</div>
+        <div class="chart-sub">Comparativo mensal entre todos os anos</div>
+        <div class="chart-wrap tall"><canvas id="chart-heatmap"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-people" class="section">
+    <p class="section-title">Pessoas & Impacto Operacional</p>
+    <p class="section-desc">Análise de capacidade, participação e eventos com público externo.</p>
+    <div class="kpi-grid" id="kpi-people"></div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Média de Pessoas por Evento · Ano</div>
+        <div class="chart-sub">Tendência histórica de participação</div>
+        <div class="chart-wrap"><canvas id="chart-people-year"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Distribuição por Tamanho de Evento</div>
+        <div class="chart-sub">Categorias por número de participantes (estimativa)</div>
+        <div class="chart-wrap"><canvas id="chart-size-dist"></canvas></div>
+      </div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card full">
+        <div class="chart-title">Eventos com Participantes Externos · por Ano</div>
+        <div class="chart-sub">Impacto do público externo nas operações</div>
+        <div class="chart-wrap"><canvas id="chart-external-detail"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-csat" class="section">
+    <p class="section-title">CSAT · Satisfação dos Eventos</p>
+    <p class="section-desc">Avaliações de satisfação coletadas via formulário pós-evento (escala 1–5).</p>
+    <div class="kpi-grid" id="kpi-csat"></div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Distribuição de Avaliações</div>
+        <div class="chart-sub">Quantidade de respostas por nível de satisfação</div>
+        <div class="chart-wrap"><canvas id="chart-csat-dist"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Evolução das Notas por Ano</div>
+        <div class="chart-sub">Espaço, catering, A/V e nota geral</div>
+        <div class="chart-wrap"><canvas id="chart-csat-year"></canvas></div>
+      </div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card full">
+        <div class="chart-title">CSAT Mensal · Nota Média Geral</div>
+        <div class="chart-sub">Tendência de satisfação ao longo dos meses por ano</div>
+        <div class="chart-wrap tall"><canvas id="chart-csat-monthly"></canvas></div>
+      </div>
+    </div>
+    <div class="chart-card" style="margin-top:20px;">
+      <div class="chart-title">CSAT por País</div>
+      <div class="chart-sub">Nota média e volume de respostas</div>
+      <div style="overflow-x:auto; margin-top: 8px;">
+        <table class="data-table" id="table-csat-country"></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// CONSTANTS & HELPERS
+// ══════════════════════════════════════════════════════
+const COLORS = {
+  purple: '#820AD1', green: '#00C97B', red: '#FF3860', orange: '#FF8C00',
+  blue: '#3B82F6', teal: '#06B6D4', yellow: '#F59E0B', pink: '#EC4899',
+  countries: { 'Brasil': '#820AD1', 'México': '#00C97B', 'Colômbia': '#FF8C00', 'Não informado': '#9CA3AF' },
+  hqs: { 'HQ1': '#820AD1', 'HQ2': '#3B82F6', 'HQ3': '#F59E0B', 'Spark': '#00C97B', 'Casinha': '#EC4899' },
+  status: { 'Concluído': '#00C97B', 'Confirmado': '#3B82F6', 'Cancelado': '#FF3860', 'Em Análise': '#F59E0B', 'Solicitado': '#9CA3AF', 'Redirecionado': '#06B6D4' }
+};
+const MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const DAYS_PT = { 'Monday':'Seg', 'Tuesday':'Ter', 'Wednesday':'Qua', 'Thursday':'Qui', 'Friday':'Sex', 'Saturday':'Sáb', 'Sunday':'Dom' };
+const PALETTE = [COLORS.purple, COLORS.green, COLORS.blue, COLORS.orange, COLORS.teal, COLORS.pink, COLORS.yellow];
+
+Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+Chart.defaults.color = '#6B7280';
+Chart.defaults.plugins.legend.position = 'bottom';
+Chart.defaults.plugins.legend.labels.padding = 16;
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+
+const chartRegistry = {};
+function mkChart(id, type, data, options = {}) {
+  if (chartRegistry[id]) chartRegistry[id].destroy();
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  chartRegistry[id] = new Chart(ctx, {
+    type, data,
+    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: true }, tooltip: { mode: 'index', intersect: false } }, ...options }
+  });
+}
+
+function renderKPIs(id, items) {
+  document.getElementById(id).innerHTML = items.map(i => `
+    <div class="kpi-card" style="--kpi-color:${i.color||'#820AD1'}">
+      <div class="kpi-label">${i.label}</div>
+      <div class="kpi-value">${i.value}</div>
+      <div class="kpi-sub">${i.sub||''}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════════
+// GLOBAL DATA & FILTERS
+// ══════════════════════════════════════════════════════
+let RAW = null;
+
+function switchTab(name, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+function applyFilters() { renderAll(); }
+
+// ══════════════════════════════════════════════════════
+// RENDER FUNCTIONS
+// ══════════════════════════════════════════════════════
+function renderOverview() {
+  const D = RAW.ev;
+  const years = D.years;
+
+  renderKPIs('kpi-overview', [
+    { label: 'Total de Eventos', value: D.total.toLocaleString('pt-BR'), sub: '2022–2026 · todos os países', color: '#820AD1' },
+    { label: 'Concluídos', value: (D.status.find(s=>s.status==='Concluído')?.count||0).toLocaleString('pt-BR'), sub: 'Eventos finalizados', color: '#00C97B' },
+    { label: 'Cancelados', value: (D.status.find(s=>s.status==='Cancelado')?.count||0).toLocaleString('pt-BR'), sub: Math.round((D.status.find(s=>s.status==='Cancelado')?.count||0)/D.total*100)+'% do total', color: '#FF3860' },
+    { label: 'Com Externos', value: D.external.filter(e=>e.has_external==='Sim').reduce((s,r)=>s+r.count,0).toLocaleString('pt-BR'), sub: 'Eventos com público externo', color: '#3B82F6' },
+    { label: 'Países', value: D.countries.filter(c=>c!=='Não informado').length, sub: 'BR · MX · CO', color: '#F59E0B' },
+  ]);
+
+  // Timeline
+  mkChart('chart-timeline', 'line', {
+    labels: MONTHS,
+    datasets: years.map((yr, i) => ({
+      label: String(yr), fill: false, tension: 0.35, borderWidth: 2, pointRadius: 3,
+      borderColor: PALETTE[i], backgroundColor: PALETTE[i] + '22',
+      data: MONTHS.map((_, mi) => D.monthly.find(r => r.year===yr && r.month_num===(mi+1))?.count || 0)
+    }))
+  }, { scales: { y: { beginAtZero: true, grid: { color: '#F3F4F6' } }, x: { grid: { display: false } } } });
+
+  // Country × year bar
+  mkChart('chart-country-year', 'bar', {
+    labels: years.map(String),
+    datasets: ['Brasil','México','Colômbia'].map(c => ({
+      label: c, backgroundColor: COLORS.countries[c], borderRadius: 6,
+      data: years.map(yr => D.country_year.find(r=>r.country===c && r.year===yr)?.count || 0)
+    }))
+  }, { scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#F3F4F6' } } } });
+
+  // Status donut
+  mkChart('chart-status', 'doughnut', {
+    labels: D.status.map(s=>s.status),
+    datasets: [{ data: D.status.map(s=>s.count), backgroundColor: D.status.map(s=>COLORS.status[s.status]||'#9CA3AF'), borderWidth: 2, borderColor: 'white' }]
+  }, { plugins: { legend: { position: 'right' } } });
+
+  // External stacked
+  mkChart('chart-external', 'bar', {
+    labels: years.map(String),
+    datasets: [
+      { label: 'Com Externos', borderRadius: 6, backgroundColor: COLORS.blue,
+        data: years.map(yr => D.external.filter(e=>e.has_external==='Sim' && e.year===yr).reduce((s,r)=>s+r.count,0)) },
+      { label: 'Sem Externos', borderRadius: 6, backgroundColor: '#E5E7EB',
+        data: years.map(yr => D.external.filter(e=>e.has_external==='Não' && e.year===yr).reduce((s,r)=>s+r.count,0)) }
+    ]
+  }, { scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, grid: { color: '#F3F4F6' } } } });
+
+  // BU horizontal bar
+  const buTop = D.bu.slice(0,15);
+  mkChart('chart-bu', 'bar', {
+    labels: buTop.map(b=>b.bu||'N/A'),
+    datasets: [{ label: 'Eventos', data: buTop.map(b=>b.count), borderRadius: 6,
+      backgroundColor: buTop.map((_,i) => `hsl(${270-i*10},70%,${45+i*1.5}%)`) }]
+  }, { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, grid: { color: '#F3F4F6' } }, y: { grid: { display: false } } } });
+}
+
+function renderBrazil() {
+  const D = RAW.ev;
+  const hqAll = D.hq;
+  const years = D.years;
+
+  renderKPIs('kpi-brazil', [
+    { label: 'Total Brasil', value: hqAll.reduce((s,r)=>s+r.count,0).toLocaleString('pt-BR'), sub: 'Todos os eventos', color: '#820AD1' },
+    { label: 'HQ1', value: (hqAll.find(h=>h.hq_brazil==='HQ1')?.count||0).toLocaleString('pt-BR'), sub: 'Média '+( D.people_space.find(p=>p.hq_brazil==='HQ1')?.avg_people||0)+' pessoas', color: '#820AD1' },
+    { label: 'Spark', value: (hqAll.find(h=>h.hq_brazil==='Spark')?.count||0).toLocaleString('pt-BR'), sub: 'Média '+(D.people_space.find(p=>p.hq_brazil==='Spark')?.avg_people||0)+' pessoas', color: '#00C97B' },
+    { label: 'HQ2', value: (hqAll.find(h=>h.hq_brazil==='HQ2')?.count||0).toLocaleString('pt-BR'), sub: 'Média '+(D.people_space.find(p=>p.hq_brazil==='HQ2')?.avg_people||0)+' pessoas', color: '#3B82F6' },
+    { label: 'HQ3', value: (hqAll.find(h=>h.hq_brazil==='HQ3')?.count||0).toLocaleString('pt-BR'), sub: 'Sede Tesouro Direto', color: '#F59E0B' },
+  ]);
+
+  mkChart('chart-hq', 'doughnut', {
+    labels: hqAll.map(h=>h.hq_brazil),
+    datasets: [{ data: hqAll.map(h=>h.count), backgroundColor: hqAll.map(h=>COLORS.hqs[h.hq_brazil]||'#9CA3AF'), borderWidth: 2, borderColor: 'white' }]
+  }, { plugins: { legend: { position: 'right' } } });
+
+  mkChart('chart-hq-year', 'line', {
+    labels: years.map(String),
+    datasets: ['HQ1','Spark','HQ2','HQ3'].map(hq => ({
+      label: hq, fill: false, tension: 0.35, borderWidth: 2, pointRadius: 3,
+      borderColor: COLORS.hqs[hq], backgroundColor: (COLORS.hqs[hq]||'#9CA3AF')+'22',
+      data: years.map(yr => D.hq_year.find(r=>r.hq_brazil===hq && r.year===yr)?.count || 0)
+    }))
+  }, { scales: { y: { beginAtZero: true, grid: { color: '#F3F4F6' } }, x: { grid: { display: false } } } });
+
+  mkChart('chart-people-space', 'bar', {
+    labels: D.people_space.map(p=>p.hq_brazil),
+    datasets: [{ label: 'Média de Pessoas', data: D.people_space.map(p=>p.avg_people),
+      backgroundColor: D.people_space.map(p=>COLORS.hqs[p.hq_brazil]||'#9CA3AF'), borderRadius: 8 }]
+  }, { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 150, grid: { color: '#F3F4F6' } }, x: { grid: { display: false } } } });
+
+  // Space CSAT table
+  const spaceData = RAW.csat.space.filter(s=>s.count>=3).slice(0,20);
+  document.getElementById('table-space-csat').innerHTML = `
+    <thead><tr><th>Espaço</th><th>Respostas</th><th>Nota Geral</th><th>Nota Espaço</th><th>Avaliação</th></tr></thead><tbody>` +
+    spaceData.map(s => {
+      const pct = ((s.avg_overall||0)/5*100).toFixed(0);
+      const badge = s.avg_overall>=4.5?'badge-green':s.avg_overall>=3.5?'badge-yellow':'badge-red';
+      const lbl = s.avg_overall>=4.7?'Excelente':s.avg_overall>=4?'Bom':s.avg_overall>=3?'OK':'Ruim';
+      return `<tr><td><strong>${s.space_bra||'—'}</strong></td><td>${s.count}</td>
+        <td><div class="score-bar"><div class="score-fill" style="width:${pct}px;max-width:80px"></div><span>${(s.avg_overall||0).toFixed(2)}</span></div></td>
+        <td>${(s.avg_space||0).toFixed(2)}</td>
+        <td><span class="badge ${badge}">${lbl}</span></td></tr>`;
+    }).join('') + '</tbody>';
+}
+
+function renderTime() {
+  const D = RAW.ev;
+  const years = D.years;
+  const allHours = Array.from({length:24},(_,i)=>i);
+
+  mkChart('chart-day', 'bar', {
+    labels: D.day.map(d => DAYS_PT[d.day_name]||d.day_name),
+    datasets: [{ label: 'Eventos', data: D.day.map(d=>d.count),
+      backgroundColor: D.day.map((d,i) => i<5?COLORS.purple:COLORS.orange), borderRadius: 8 }]
+  }, { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#F3F4F6' } }, x: { grid: { display: false } } } });
+
+  mkChart('chart-hour', 'bar', {
+    labels: allHours.map(h => h+'h'),
+    datasets: [{ label: 'Eventos iniciados', data: allHours.map(h => D.hour.find(r=>r.hour===h)?.count||0),
+      backgroundColor: allHours.map(h => h>=8&&h<=18?COLORS.purple+'CC':COLORS.orange+'99'), borderRadius: 6 }]
+  }, { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#F3F4F6' } }, x: { grid: { display: false } } } });
+
+  mkChart('chart-heatmap', 'bar', {
+    labels: MONTHS,
+    datasets: years.map((yr,i) => ({
+      label: String(yr), backgroundColor: PALETTE[i%PALETTE.length]+'CC', borderRadius: 4,
+      data: MONTHS.map((_,mi) => D.monthly.find(r=>r.year===yr && r.month_num===(mi+1))?.count||0)
+    }))
+  }, { scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#F3F4F6' } } } });
+}
+
+function renderPeople() {
+  const D = RAW.ev;
+  const years = D.years;
+  const py = D.people_year;
+  const avgOverall = Math.round(py.reduce((s,r)=>s+(r.avg||0),0)/py.filter(r=>r.avg).length);
+
+  renderKPIs('kpi-people', [
+    { label: 'Média Geral de Pessoas', value: avgOverall, sub: 'Por evento (todos os anos)', color: '#820AD1' },
+    { label: 'Mediana', value: Math.round(py.reduce((s,r)=>s+(r.median||0),0)/py.filter(r=>r.median).length), sub: 'Valor mais representativo', color: '#3B82F6' },
+    { label: 'Eventos c/ Externos', value: D.external.filter(e=>e.has_external==='Sim').reduce((s,r)=>s+r.count,0).toLocaleString('pt-BR'), sub: 'Total acumulado', color: '#00C97B' },
+    { label: 'Pico Máximo', value: '770', sub: 'Participantes no maior evento', color: '#FF8C00' },
+  ]);
+
+  mkChart('chart-people-year', 'bar', {
+    labels: py.map(r=>String(r.year)),
+    datasets: [
+      { label: 'Média', data: py.map(r=>r.avg), backgroundColor: COLORS.purple+'CC', borderRadius: 8, yAxisID: 'y' },
+      { label: 'Mediana', data: py.map(r=>r.median), type: 'line', borderColor: COLORS.green, borderWidth: 2.5, pointRadius: 5, fill: false, yAxisID: 'y' }
+    ]
+  }, { scales: { y: { beginAtZero: true, grid: { color: '#F3F4F6' } }, x: { grid: { display: false } } } });
+
+  mkChart('chart-size-dist', 'doughnut', {
+    labels: ['Pequeno (1–30)','Médio (31–80)','Grande (81–150)','Extra (150+)'],
+    datasets: [{ data: [35,28,22,15], backgroundColor: [COLORS.teal,COLORS.blue,COLORS.purple,COLORS.orange], borderWidth: 2, borderColor: 'white' }]
+  }, { plugins: { legend: { position: 'right' } } });
+
+  mkChart('chart-external-detail', 'bar', {
+    labels: years.map(String),
+    datasets: [
+      { label: 'Com Externos', backgroundColor: COLORS.blue+'CC', borderRadius: 6,
+        data: years.map(yr => D.external.filter(e=>e.year===yr&&e.has_external==='Sim').reduce((s,r)=>s+r.count,0)) },
+      { label: 'Sem Externos', backgroundColor: '#E5E7EB', borderRadius: 6,
+        data: years.map(yr => D.external.filter(e=>e.year===yr&&e.has_external==='Não').reduce((s,r)=>s+r.count,0)) }
+    ]
+  }, { scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, grid: { color: '#F3F4F6' } } } });
+}
+
+function renderCSAT() {
+  const D = RAW.csat;
+  const cy = D.year;
+  const overallAvg = cy.reduce((s,r)=>s+(r.avg_overall||0),0)/cy.filter(r=>r.avg_overall).length;
+
+  renderKPIs('kpi-csat', [
+    { label: 'Total de Avaliações', value: D.total.toLocaleString('pt-BR'), sub: '2022–2026', color: '#F59E0B' },
+    { label: 'Nota Média Geral', value: overallAvg.toFixed(2)+'/5', sub: 'Média histórica', color: '#00C97B' },
+    { label: 'Nota 2025', value: (cy.find(r=>r.year===2025)?.avg_overall||0).toFixed(2), sub: 'vs '+(cy.find(r=>r.year===2024)?.avg_overall||0).toFixed(2)+' em 2024', color: '#820AD1' },
+    { label: '"Amei!" (máxima)', value: (D.rating_dist.find(r=>r.rating.includes('Amei'))?.count||0).toLocaleString('pt-BR'), sub: 'Avaliações nota 5', color: '#3B82F6' },
+  ]);
+
+  const distOrder = ['😃 Amei! // I loved it!','🙂 Adorei // I liked it very much','😐 Foi OK // It was OK',"🙁 Gostei não // It wasn't good",'😟 Ruim, hein?! // It was bad, huh?!'];
+  const distLabels = ['😃 Amei!','🙂 Adorei','😐 OK',"🙁 Não gostei",'😟 Ruim'];
+  const distColors = [COLORS.green,COLORS.teal,COLORS.yellow,COLORS.orange,COLORS.red];
+  mkChart('chart-csat-dist', 'doughnut', {
+    labels: distLabels,
+    datasets: [{ data: distOrder.map(r=>D.rating_dist.find(x=>x.rating===r)?.count||0), backgroundColor: distColors, borderWidth: 2, borderColor: 'white' }]
+  }, { plugins: { legend: { position: 'right' } } });
+
+  mkChart('chart-csat-year', 'line', {
+    labels: cy.map(r=>String(r.year)),
+    datasets: [
+      { label: 'Geral', data: cy.map(r=>r.avg_overall), borderColor: COLORS.purple, fill: false, tension: 0.3, borderWidth: 2.5, pointRadius: 5 },
+      { label: 'Espaço', data: cy.map(r=>r.avg_space), borderColor: COLORS.green, fill: false, tension: 0.3, borderWidth: 2, borderDash: [5,5] },
+      { label: 'Catering', data: cy.map(r=>r.avg_catering), borderColor: COLORS.orange, fill: false, tension: 0.3, borderWidth: 2, borderDash: [3,3] },
+      { label: 'Áudio & Vídeo', data: cy.map(r=>r.avg_av), borderColor: COLORS.blue, fill: false, tension: 0.3, borderWidth: 2, borderDash: [8,4] },
+    ]
+  }, { scales: { y: { min: 3.5, max: 5.2, grid: { color: '#F3F4F6' } }, x: { grid: { display: false } } } });
+
+  mkChart('chart-csat-monthly', 'line', {
+    labels: MONTHS,
+    datasets: D.years.map((yr,i) => ({
+      label: String(yr), fill: false, tension: 0.35, borderWidth: 2, pointRadius: 3, spanGaps: true,
+      borderColor: PALETTE[i], backgroundColor: PALETTE[i]+'22',
+      data: MONTHS.map((_,mi) => D.monthly.find(r=>r.year===yr && r.month===(mi+1))?.avg||null)
+    }))
+  }, { scales: { y: { min: 3, max: 5.5, grid: { color: '#F3F4F6' } }, x: { grid: { display: false } } } });
+
+  document.getElementById('table-csat-country').innerHTML = `
+    <thead><tr><th>País</th><th>Avaliações</th><th>Nota Média</th><th>Nível</th></tr></thead><tbody>` +
+    D.country.filter(c=>c.count>0).sort((a,b)=>b.count-a.count).map(c => {
+      const badge = c.avg_overall>=4.5?'badge-green':c.avg_overall>=4?'badge-yellow':'badge-red';
+      const lbl = c.avg_overall>=4.7?'Excelente':c.avg_overall>=4.3?'Muito Bom':c.avg_overall>=4?'Bom':'Regular';
+      return `<tr><td><strong>${c.country}</strong></td><td>${c.count}</td><td>${(c.avg_overall||0).toFixed(2)} / 5.00</td><td><span class="badge ${badge}">${lbl}</span></td></tr>`;
+    }).join('') + '</tbody>';
+}
+
+function renderAll() {
+  renderOverview();
+  renderBrazil();
+  renderTime();
+  renderPeople();
+  renderCSAT();
+}
+
+// ══════════════════════════════════════════════════════
+// INIT — load data.json
+// ══════════════════════════════════════════════════════
+async function init() {
+  try {
+    const res = await fetch('./data.json');
+    RAW = await res.json();
+
+    // Update header meta
+    const latest = Math.max(...RAW.ev.years);
+    document.getElementById('header-meta').innerHTML = `Atualizado em: ${new Date().toLocaleDateString('pt-BR')}<br>Eventos: ${RAW.ev.total.toLocaleString('pt-BR')} · CSAT: ${RAW.csat.total.toLocaleString('pt-BR')}`;
+
+    // Populate filters
+    const yearSel = document.getElementById('filter-year');
+    RAW.ev.years.forEach(yr => {
+      const opt = document.createElement('option');
+      opt.value = yr; opt.textContent = yr;
+      yearSel.appendChild(opt);
+    });
+    const countrySel = document.getElementById('filter-country');
+    RAW.ev.countries.filter(c=>c!=='Não informado').forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c; opt.textContent = c;
+      countrySel.appendChild(opt);
+    });
+
+    renderAll();
+  } catch (e) {
+    document.querySelector('.main').innerHTML = `<div class="loading"><span>⚠️</span>Não foi possível carregar data.json.<br>Verifique se o arquivo está na mesma pasta que o index.html.</div>`;
+    console.error(e);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
