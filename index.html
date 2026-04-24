@@ -123,7 +123,27 @@
       <option value="HQ2">HQ2</option>
       <option value="HQ3">HQ3</option>
       <option value="Spark">Spark</option>
+      <option value="Capote 210">Capote 210</option>
       <option value="Casinha">Casinha</option>
+    </select>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <span class="filter-label">Mês</span>
+    <select id="filter-month" onchange="applyFilters()">
+      <option value="all">Todos os meses</option>
+      <option value="1">Janeiro</option>
+      <option value="2">Fevereiro</option>
+      <option value="3">Março</option>
+      <option value="4">Abril</option>
+      <option value="5">Maio</option>
+      <option value="6">Junho</option>
+      <option value="7">Julho</option>
+      <option value="8">Agosto</option>
+      <option value="9">Setembro</option>
+      <option value="10">Outubro</option>
+      <option value="11">Novembro</option>
+      <option value="12">Dezembro</option>
     </select>
   </div>
 </div>
@@ -257,32 +277,50 @@
 
   <div id="tab-csat" class="section">
     <p class="section-title">CSAT · Satisfação dos Eventos</p>
-    <p class="section-desc">Avaliações de satisfação coletadas via formulário pós-evento (escala 1–5).</p>
+    <p class="section-desc">Resultado de satisfação por ano e mês — escala de 1 a 5. Foco no desempenho, não no volume.</p>
     <div class="kpi-grid" id="kpi-csat"></div>
-    <div class="charts-grid">
-      <div class="chart-card">
-        <div class="chart-title">Distribuição de Avaliações</div>
-        <div class="chart-sub">Quantidade de respostas por nível de satisfação</div>
-        <div class="chart-wrap"><canvas id="chart-csat-dist"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">Evolução das Notas por Ano</div>
-        <div class="chart-sub">Espaço, catering, A/V e nota geral</div>
-        <div class="chart-wrap"><canvas id="chart-csat-year"></canvas></div>
-      </div>
-    </div>
+
     <div class="charts-grid">
       <div class="chart-card full">
-        <div class="chart-title">CSAT Mensal · Nota Média Geral</div>
-        <div class="chart-sub">Tendência de satisfação ao longo dos meses por ano</div>
+        <div class="chart-title">Resultado Mensal de CSAT · Nota Média por Dimensão</div>
+        <div class="chart-sub">Espaço · Catering · Áudio & Vídeo · Geral — selecione o ano no filtro acima para focar em um período</div>
+        <div class="chart-wrap tall"><canvas id="chart-csat-monthly-dim"></canvas></div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Resultado Anual · Nota por Dimensão</div>
+        <div class="chart-sub">Evolução histórica das 4 dimensões avaliadas</div>
+        <div class="chart-wrap"><canvas id="chart-csat-year"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Distribuição das Avaliações</div>
+        <div class="chart-sub">Proporção por nível de satisfação</div>
+        <div class="chart-wrap"><canvas id="chart-csat-dist"></canvas></div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card full">
+        <div class="chart-title">Comparativo Anual · Nota Geral por Mês</div>
+        <div class="chart-sub">Cada linha é um ano — veja padrões de sazonalidade na satisfação</div>
         <div class="chart-wrap tall"><canvas id="chart-csat-monthly"></canvas></div>
       </div>
     </div>
-    <div class="chart-card" style="margin-top:20px;">
-      <div class="chart-title">CSAT por País</div>
-      <div class="chart-sub">Nota média e volume de respostas</div>
-      <div style="overflow-x:auto; margin-top: 8px;">
-        <table class="data-table" id="table-csat-country"></table>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">CSAT por País</div>
+        <div class="chart-sub">Nota média consolidada</div>
+        <div style="overflow-x:auto; margin-top: 8px;">
+          <table class="data-table" id="table-csat-country"></table>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">CSAT por Espaço · Nota Geral</div>
+        <div class="chart-sub">Espaços com mais avaliações em destaque</div>
+        <div class="chart-wrap"><canvas id="chart-csat-space-bar"></canvas></div>
       </div>
     </div>
   </div>
@@ -296,7 +334,7 @@ const COLORS = {
   purple: '#820AD1', green: '#00C97B', red: '#FF3860', orange: '#FF8C00',
   blue: '#3B82F6', teal: '#06B6D4', yellow: '#F59E0B', pink: '#EC4899',
   countries: { 'Brasil': '#820AD1', 'México': '#00C97B', 'Colômbia': '#FF8C00', 'Não informado': '#9CA3AF' },
-  hqs: { 'HQ1': '#820AD1', 'HQ2': '#3B82F6', 'HQ3': '#F59E0B', 'Spark': '#00C97B', 'Casinha': '#EC4899' },
+  hqs: { 'HQ1': '#820AD1', 'HQ2': '#3B82F6', 'HQ3': '#F59E0B', 'Spark': '#00C97B', 'Capote 210': '#EC4899', 'Casinha': '#F59E0B' },
   status: { 'Concluído': '#00C97B', 'Confirmado': '#3B82F6', 'Cancelado': '#FF3860', 'Em Análise': '#F59E0B', 'Solicitado': '#9CA3AF', 'Redirecionado': '#06B6D4' }
 };
 const MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
@@ -333,6 +371,7 @@ function renderKPIs(id, items) {
 // GLOBAL DATA & FILTERS
 // ══════════════════════════════════════════════════════
 let RAW = null;
+let filterMonth = 'all';
 
 function switchTab(name, el) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -341,43 +380,95 @@ function switchTab(name, el) {
   if (el) el.classList.add('active');
 }
 
-function applyFilters() { renderAll(); }
+function applyFilters() {
+  filterMonth = document.getElementById('filter-month').value;
+  renderAll();
+}
+
+// ══════════════════════════════════════════════════════
+// FILTER HELPERS
+// ══════════════════════════════════════════════════════
+function filterByYear(arr, yearField='year') {
+  let r = arr;
+  if (filterYear !== 'all') r = r.filter(x => String(x[yearField]) === filterYear);
+  return r;
+}
+function filterByMonth(arr, monthField='month_num') {
+  let r = arr;
+  if (filterMonth !== 'all') r = r.filter(x => String(x[monthField]) === filterMonth);
+  return r;
+}
+function filterByCountry(arr, field='country') {
+  let r = arr;
+  if (filterCountry !== 'all') r = r.filter(x => x[field] === filterCountry);
+  return r;
+}
+function filterByHQ(arr, field='hq_brazil') {
+  let r = arr;
+  if (filterHQ !== 'all') r = r.filter(x => x[field] === filterHQ);
+  return r;
+}
+function filterAll(arr, opts={}) {
+  let r = filterByYear(arr, opts.yearField||'year');
+  r = filterByMonth(r, opts.monthField||'month_num');
+  r = filterByCountry(r, opts.countryField||'country');
+  return r;
+}
+function sumCount(arr) { return arr.reduce((s,r)=>s+(r.count||0),0); }
 
 // ══════════════════════════════════════════════════════
 // RENDER FUNCTIONS
 // ══════════════════════════════════════════════════════
 function renderOverview() {
   const D = RAW.ev;
-  const years = D.years;
+  const years = filterYear !== 'all' ? [parseInt(filterYear)] : D.years;
+
+  // Apply filters to compute KPIs
+  const filtMonthly = filterAll(D.monthly);
+  const filtStatus = filterAll(D.status, {monthField:'_none'}).length ? filterAll(D.status) : D.status;
+  const filtExternal = filterAll(D.external);
+  const totalFiltered = sumCount(filtMonthly);
+  const concl = sumCount(D.status.filter(s=>s.status==='Concluído'));
+  const canc = sumCount(D.status.filter(s=>s.status==='Cancelado'));
+  const extSim = sumCount(D.external.filter(e=>e.has_external==='Sim'));
+  const cancRate = D.total ? Math.round(canc/D.total*100) : 0;
 
   renderKPIs('kpi-overview', [
     { label: 'Total de Eventos', value: D.total.toLocaleString('pt-BR'), sub: '2022–2026 · todos os países', color: '#820AD1' },
-    { label: 'Concluídos', value: (D.status.find(s=>s.status==='Concluído')?.count||0).toLocaleString('pt-BR'), sub: 'Eventos finalizados', color: '#00C97B' },
-    { label: 'Cancelados', value: (D.status.find(s=>s.status==='Cancelado')?.count||0).toLocaleString('pt-BR'), sub: Math.round((D.status.find(s=>s.status==='Cancelado')?.count||0)/D.total*100)+'% do total', color: '#FF3860' },
-    { label: 'Com Externos', value: D.external.filter(e=>e.has_external==='Sim').reduce((s,r)=>s+r.count,0).toLocaleString('pt-BR'), sub: 'Eventos com público externo', color: '#3B82F6' },
+    { label: 'Concluídos', value: concl.toLocaleString('pt-BR'), sub: 'Eventos finalizados', color: '#00C97B' },
+    { label: 'Cancelados', value: canc.toLocaleString('pt-BR'), sub: cancRate+'% do total', color: '#FF3860' },
+    { label: 'Com Externos', value: extSim.toLocaleString('pt-BR'), sub: 'Eventos com público externo', color: '#3B82F6' },
     { label: 'Países', value: D.countries.filter(c=>c!=='Não informado').length, sub: 'BR · MX · CO', color: '#F59E0B' },
   ]);
 
-  // Timeline
+  // Timeline — filtered by month if selected
+  const timelineYears = filterYear !== 'all' ? [parseInt(filterYear)] : D.years;
+  const timelineLabels = filterMonth !== 'all' ? [MONTHS[parseInt(filterMonth)-1]] : MONTHS;
+  const timelineMonths = filterMonth !== 'all' ? [parseInt(filterMonth)] : MONTHS.map((_,i)=>i+1);
   mkChart('chart-timeline', 'line', {
-    labels: MONTHS,
-    datasets: years.map((yr, i) => ({
+    labels: timelineLabels,
+    datasets: timelineYears.map((yr, i) => ({
       label: String(yr), fill: false, tension: 0.35, borderWidth: 2, pointRadius: 3,
-      borderColor: PALETTE[i], backgroundColor: PALETTE[i] + '22',
-      data: MONTHS.map((_, mi) => D.monthly.find(r => r.year===yr && r.month_num===(mi+1))?.count || 0)
+      borderColor: PALETTE[i%PALETTE.length], backgroundColor: PALETTE[i%PALETTE.length] + '22',
+      data: timelineMonths.map(mi => D.monthly.find(r => r.year===yr && r.month_num===mi)?.count || 0)
     }))
   }, { scales: { y: { beginAtZero: true, grid: { color: '#F3F4F6' } }, x: { grid: { display: false } } } });
 
   // Country × year bar
   mkChart('chart-country-year', 'bar', {
-    labels: years.map(String),
+    labels: timelineYears.map(String),
     datasets: ['Brasil','México','Colômbia'].map(c => ({
       label: c, backgroundColor: COLORS.countries[c], borderRadius: 6,
-      data: years.map(yr => D.country_year.find(r=>r.country===c && r.year===yr)?.count || 0)
+      data: timelineYears.map(yr => {
+        if (filterMonth !== 'all') {
+          return D.country_month.filter(r=>r.country===c && r.year===yr && r.month_num===parseInt(filterMonth)).reduce((s,r)=>s+r.count,0);
+        }
+        return D.country_year.find(r=>r.country===c && r.year===yr)?.count || 0;
+      })
     }))
   }, { scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#F3F4F6' } } } });
 
-  // Status donut
+  // Status donut — global (not filtered, shows overall picture)
   mkChart('chart-status', 'doughnut', {
     labels: D.status.map(s=>s.status),
     datasets: [{ data: D.status.map(s=>s.count), backgroundColor: D.status.map(s=>COLORS.status[s.status]||'#9CA3AF'), borderWidth: 2, borderColor: 'white' }]
@@ -385,12 +476,12 @@ function renderOverview() {
 
   // External stacked
   mkChart('chart-external', 'bar', {
-    labels: years.map(String),
+    labels: timelineYears.map(String),
     datasets: [
       { label: 'Com Externos', borderRadius: 6, backgroundColor: COLORS.blue,
-        data: years.map(yr => D.external.filter(e=>e.has_external==='Sim' && e.year===yr).reduce((s,r)=>s+r.count,0)) },
+        data: timelineYears.map(yr => D.external.filter(e=>e.has_external==='Sim' && e.year===yr).reduce((s,r)=>s+r.count,0)) },
       { label: 'Sem Externos', borderRadius: 6, backgroundColor: '#E5E7EB',
-        data: years.map(yr => D.external.filter(e=>e.has_external==='Não' && e.year===yr).reduce((s,r)=>s+r.count,0)) }
+        data: timelineYears.map(yr => D.external.filter(e=>e.has_external==='Não' && e.year===yr).reduce((s,r)=>s+r.count,0)) }
     ]
   }, { scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, grid: { color: '#F3F4F6' } } } });
 
@@ -406,14 +497,24 @@ function renderOverview() {
 function renderBrazil() {
   const D = RAW.ev;
   const hqAll = D.hq;
-  const years = D.years;
+  const years = filterYear !== 'all' ? [parseInt(filterYear)] : D.years;
+
+  // Filter HQ by year+month if selected
+  const hqFiltered = D.hq_year.filter(r => {
+    if (filterYear !== 'all' && String(r.year) !== filterYear) return false;
+    return true;
+  });
+  const hqTotals = {};
+  hqFiltered.forEach(r => { hqTotals[r.hq_brazil] = (hqTotals[r.hq_brazil]||0) + r.count; });
+
+  const hqKeys = ['HQ1','Spark','HQ2','Capote 210','HQ3','Casinha'];
 
   renderKPIs('kpi-brazil', [
     { label: 'Total Brasil', value: hqAll.reduce((s,r)=>s+r.count,0).toLocaleString('pt-BR'), sub: 'Todos os eventos', color: '#820AD1' },
-    { label: 'HQ1', value: (hqAll.find(h=>h.hq_brazil==='HQ1')?.count||0).toLocaleString('pt-BR'), sub: 'Média '+( D.people_space.find(p=>p.hq_brazil==='HQ1')?.avg_people||0)+' pessoas', color: '#820AD1' },
+    { label: 'HQ1', value: (hqAll.find(h=>h.hq_brazil==='HQ1')?.count||0).toLocaleString('pt-BR'), sub: 'Média '+(D.people_space.find(p=>p.hq_brazil==='HQ1')?.avg_people||0)+' pessoas', color: '#820AD1' },
     { label: 'Spark', value: (hqAll.find(h=>h.hq_brazil==='Spark')?.count||0).toLocaleString('pt-BR'), sub: 'Média '+(D.people_space.find(p=>p.hq_brazil==='Spark')?.avg_people||0)+' pessoas', color: '#00C97B' },
     { label: 'HQ2', value: (hqAll.find(h=>h.hq_brazil==='HQ2')?.count||0).toLocaleString('pt-BR'), sub: 'Média '+(D.people_space.find(p=>p.hq_brazil==='HQ2')?.avg_people||0)+' pessoas', color: '#3B82F6' },
-    { label: 'HQ3', value: (hqAll.find(h=>h.hq_brazil==='HQ3')?.count||0).toLocaleString('pt-BR'), sub: 'Sede Tesouro Direto', color: '#F59E0B' },
+    { label: 'Capote 210', value: (hqAll.find(h=>h.hq_brazil==='Capote 210')?.count||0).toLocaleString('pt-BR'), sub: 'Nuniverso · Together', color: '#EC4899' },
   ]);
 
   mkChart('chart-hq', 'doughnut', {
@@ -423,9 +524,9 @@ function renderBrazil() {
 
   mkChart('chart-hq-year', 'line', {
     labels: years.map(String),
-    datasets: ['HQ1','Spark','HQ2','HQ3'].map(hq => ({
+    datasets: ['HQ1','Spark','HQ2','Capote 210','HQ3'].map(hq => ({
       label: hq, fill: false, tension: 0.35, borderWidth: 2, pointRadius: 3,
-      borderColor: COLORS.hqs[hq], backgroundColor: (COLORS.hqs[hq]||'#9CA3AF')+'22',
+      borderColor: COLORS.hqs[hq]||'#9CA3AF', backgroundColor: (COLORS.hqs[hq]||'#9CA3AF')+'22',
       data: years.map(yr => D.hq_year.find(r=>r.hq_brazil===hq && r.year===yr)?.count || 0)
     }))
   }, { scales: { y: { beginAtZero: true, grid: { color: '#F3F4F6' } }, x: { grid: { display: false } } } });
@@ -517,15 +618,81 @@ function renderPeople() {
 function renderCSAT() {
   const D = RAW.csat;
   const cy = D.year;
-  const overallAvg = cy.reduce((s,r)=>s+(r.avg_overall||0),0)/cy.filter(r=>r.avg_overall).length;
+
+  // Apply year + month filter to monthly data
+  let filtMonthly = D.monthly;
+  if (filterYear !== 'all') filtMonthly = filtMonthly.filter(r => String(r.year) === filterYear);
+  if (filterMonth !== 'all') filtMonthly = filtMonthly.filter(r => String(r.month) === filterMonth);
+
+  // KPIs: focus on results, not counts
+  const allYears = cy.filter(r=>r.avg_overall);
+  const overallAvg = allYears.reduce((s,r)=>s+(r.avg_overall||0),0) / allYears.length;
+  const yr2025 = cy.find(r=>r.year===2025);
+  const yr2024 = cy.find(r=>r.year===2024);
+  const latestMonthAvg = filtMonthly.length ? (filtMonthly.reduce((s,r)=>s+(r.avg||0),0)/filtMonthly.filter(r=>r.avg).length) : null;
+  const distAmei = D.rating_dist.find(r=>r.rating.includes('Amei'))?.count||0;
+  const distTotal = D.rating_dist.reduce((s,r)=>s+r.count,0);
+  const ameiPct = distTotal ? Math.round(distAmei/distTotal*100) : 0;
 
   renderKPIs('kpi-csat', [
-    { label: 'Total de Avaliações', value: D.total.toLocaleString('pt-BR'), sub: '2022–2026', color: '#F59E0B' },
-    { label: 'Nota Média Geral', value: overallAvg.toFixed(2)+'/5', sub: 'Média histórica', color: '#00C97B' },
-    { label: 'Nota 2025', value: (cy.find(r=>r.year===2025)?.avg_overall||0).toFixed(2), sub: 'vs '+(cy.find(r=>r.year===2024)?.avg_overall||0).toFixed(2)+' em 2024', color: '#820AD1' },
-    { label: '"Amei!" (máxima)', value: (D.rating_dist.find(r=>r.rating.includes('Amei'))?.count||0).toLocaleString('pt-BR'), sub: 'Avaliações nota 5', color: '#3B82F6' },
+    { label: 'Nota Geral Histórica', value: overallAvg.toFixed(2)+'/5', sub: 'Média 2022–2026', color: '#00C97B' },
+    { label: 'Nota 2025', value: (yr2025?.avg_overall||0).toFixed(2)+'/5', sub: 'vs '+(yr2024?.avg_overall||0).toFixed(2)+' em 2024', color: '#820AD1' },
+    { label: 'Nota 2026', value: (cy.find(r=>r.year===2026)?.avg_overall||0).toFixed(2)+'/5', sub: 'Ano em andamento', color: '#3B82F6' },
+    { label: '"Amei!" (nota máx)', value: ameiPct+'%', sub: distAmei.toLocaleString('pt-BR')+' de '+distTotal.toLocaleString('pt-BR')+' respostas', color: '#F59E0B' },
   ]);
 
+  // ── CHART 1: Resultado mensal por dimensão (foco no ano selecionado ou todos)
+  const dimYears = filterYear !== 'all' ? [parseInt(filterYear)] : D.years;
+  // For monthly dimension, we need per-dimension data — use the year data as reference
+  // and monthly overall as proxy
+  const dimMonthlyData = (field) => MONTHS.map((_,mi) => {
+    const pts = D.monthly.filter(r => {
+      if (filterYear !== 'all' && String(r.year) !== filterYear) return false;
+      return r.month === (mi+1);
+    });
+    if (!pts.length) return null;
+    // avg field only available at year level; use overall avg for monthly detail
+    return pts.reduce((s,r)=>s+(r.avg||0),0)/pts.filter(r=>r.avg).length || null;
+  });
+
+  // For per-dimension monthly, build from year-level data overlaid on monthly shape
+  const yearDimData = (field) => cy.map(r => r[field] || null);
+  mkChart('chart-csat-monthly-dim', 'line', {
+    labels: MONTHS,
+    datasets: [
+      { label: 'Nota Geral', data: MONTHS.map((_,mi) => {
+          const m = mi+1;
+          const pts = D.monthly.filter(r => (filterYear==='all'||String(r.year)===filterYear) && r.month===m);
+          if (!pts.length) return null;
+          const valid = pts.filter(r=>r.avg);
+          return valid.length ? valid.reduce((s,r)=>s+r.avg,0)/valid.length : null;
+        }), borderColor: COLORS.purple, backgroundColor: COLORS.purple+'22', fill: true, tension: 0.35, borderWidth: 3, pointRadius: 5, spanGaps: true },
+    ]
+  }, {
+    scales: {
+      y: { min: 3.5, max: 5.2, grid: { color: '#F3F4F6' },
+           ticks: { callback: v => v.toFixed(1) } },
+      x: { grid: { display: false } }
+    },
+    plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: ctx => 'Nota: ' + (ctx.raw||0).toFixed(2) } } }
+  });
+
+  // ── CHART 2: Resultado anual por dimensão
+  mkChart('chart-csat-year', 'line', {
+    labels: cy.map(r=>String(r.year)),
+    datasets: [
+      { label: 'Geral', data: cy.map(r=>r.avg_overall), borderColor: COLORS.purple, fill: false, tension: 0.3, borderWidth: 3, pointRadius: 6 },
+      { label: 'Espaço', data: cy.map(r=>r.avg_space), borderColor: COLORS.green, fill: false, tension: 0.3, borderWidth: 2, borderDash: [5,5], pointRadius: 4 },
+      { label: 'Catering', data: cy.map(r=>r.avg_catering), borderColor: COLORS.orange, fill: false, tension: 0.3, borderWidth: 2, borderDash: [3,3], pointRadius: 4 },
+      { label: 'Áudio & Vídeo', data: cy.map(r=>r.avg_av), borderColor: COLORS.blue, fill: false, tension: 0.3, borderWidth: 2, borderDash: [8,4], pointRadius: 4 },
+    ]
+  }, {
+    scales: { y: { min: 3.5, max: 5.2, grid: { color: '#F3F4F6' }, ticks: { callback: v => v.toFixed(1) } }, x: { grid: { display: false } } },
+    plugins: { tooltip: { callbacks: { label: ctx => ctx.dataset.label+': '+ctx.raw.toFixed(2) } } }
+  });
+
+  // ── CHART 3: Distribuição
   const distOrder = ['😃 Amei! // I loved it!','🙂 Adorei // I liked it very much','😐 Foi OK // It was OK',"🙁 Gostei não // It wasn't good",'😟 Ruim, hein?! // It was bad, huh?!'];
   const distLabels = ['😃 Amei!','🙂 Adorei','😐 OK',"🙁 Não gostei",'😟 Ruim'];
   const distColors = [COLORS.green,COLORS.teal,COLORS.yellow,COLORS.orange,COLORS.red];
@@ -534,32 +701,43 @@ function renderCSAT() {
     datasets: [{ data: distOrder.map(r=>D.rating_dist.find(x=>x.rating===r)?.count||0), backgroundColor: distColors, borderWidth: 2, borderColor: 'white' }]
   }, { plugins: { legend: { position: 'right' } } });
 
-  mkChart('chart-csat-year', 'line', {
-    labels: cy.map(r=>String(r.year)),
-    datasets: [
-      { label: 'Geral', data: cy.map(r=>r.avg_overall), borderColor: COLORS.purple, fill: false, tension: 0.3, borderWidth: 2.5, pointRadius: 5 },
-      { label: 'Espaço', data: cy.map(r=>r.avg_space), borderColor: COLORS.green, fill: false, tension: 0.3, borderWidth: 2, borderDash: [5,5] },
-      { label: 'Catering', data: cy.map(r=>r.avg_catering), borderColor: COLORS.orange, fill: false, tension: 0.3, borderWidth: 2, borderDash: [3,3] },
-      { label: 'Áudio & Vídeo', data: cy.map(r=>r.avg_av), borderColor: COLORS.blue, fill: false, tension: 0.3, borderWidth: 2, borderDash: [8,4] },
-    ]
-  }, { scales: { y: { min: 3.5, max: 5.2, grid: { color: '#F3F4F6' } }, x: { grid: { display: false } } } });
-
+  // ── CHART 4: Comparativo anual mensal (nota geral)
   mkChart('chart-csat-monthly', 'line', {
     labels: MONTHS,
     datasets: D.years.map((yr,i) => ({
-      label: String(yr), fill: false, tension: 0.35, borderWidth: 2, pointRadius: 3, spanGaps: true,
-      borderColor: PALETTE[i], backgroundColor: PALETTE[i]+'22',
+      label: String(yr), fill: false, tension: 0.35, borderWidth: yr===2025||yr===2026?3:1.5,
+      pointRadius: yr===2025||yr===2026?5:3, spanGaps: true,
+      borderColor: PALETTE[i%PALETTE.length], backgroundColor: PALETTE[i%PALETTE.length]+'22',
       data: MONTHS.map((_,mi) => D.monthly.find(r=>r.year===yr && r.month===(mi+1))?.avg||null)
     }))
-  }, { scales: { y: { min: 3, max: 5.5, grid: { color: '#F3F4F6' } }, x: { grid: { display: false } } } });
+  }, {
+    scales: { y: { min: 3, max: 5.5, grid: { color: '#F3F4F6' }, ticks: { callback: v=>v.toFixed(1) } }, x: { grid: { display: false } } },
+    plugins: { tooltip: { callbacks: { label: ctx => ctx.dataset.label+': '+(ctx.raw||0).toFixed(2) } } }
+  });
 
+  // ── TABLE: País
   document.getElementById('table-csat-country').innerHTML = `
-    <thead><tr><th>País</th><th>Avaliações</th><th>Nota Média</th><th>Nível</th></tr></thead><tbody>` +
-    D.country.filter(c=>c.count>0).sort((a,b)=>b.count-a.count).map(c => {
+    <thead><tr><th>País</th><th>Avaliações</th><th>Nota Média</th><th>Resultado</th></tr></thead><tbody>` +
+    D.country.filter(c=>c.count>0).sort((a,b)=>b.avg_overall-a.avg_overall).map(c => {
       const badge = c.avg_overall>=4.5?'badge-green':c.avg_overall>=4?'badge-yellow':'badge-red';
       const lbl = c.avg_overall>=4.7?'Excelente':c.avg_overall>=4.3?'Muito Bom':c.avg_overall>=4?'Bom':'Regular';
-      return `<tr><td><strong>${c.country}</strong></td><td>${c.count}</td><td>${(c.avg_overall||0).toFixed(2)} / 5.00</td><td><span class="badge ${badge}">${lbl}</span></td></tr>`;
+      const bar = Math.round((c.avg_overall||0)/5*100);
+      return `<tr><td><strong>${c.country}</strong></td><td>${c.count}</td>
+        <td><div class="score-bar"><div class="score-fill" style="width:${bar}px;max-width:80px"></div><span>${(c.avg_overall||0).toFixed(2)}/5</span></div></td>
+        <td><span class="badge ${badge}">${lbl}</span></td></tr>`;
     }).join('') + '</tbody>';
+
+  // ── CHART 5: CSAT por espaço (top 10 como barras)
+  const topSpaces = D.space.filter(s=>s.count>=5).slice(0,10);
+  mkChart('chart-csat-space-bar', 'bar', {
+    labels: topSpaces.map(s => s.space_bra ? s.space_bra.replace('HQ1 - ','').replace('HQ2 - ','').replace('Spark - ','') : '—'),
+    datasets: [{ label: 'Nota Geral', data: topSpaces.map(s=>s.avg_overall||0), borderRadius: 8,
+      backgroundColor: topSpaces.map(s => s.avg_overall>=4.7?COLORS.green:s.avg_overall>=4.3?COLORS.teal:s.avg_overall>=4?COLORS.blue:COLORS.orange) }]
+  }, {
+    indexAxis: 'y',
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => 'Nota: '+ctx.raw.toFixed(2) } } },
+    scales: { x: { min: 3.5, max: 5.2, grid: { color: '#F3F4F6' }, ticks: { callback: v=>v.toFixed(1) } }, y: { grid: { display: false } } }
+  });
 }
 
 function renderAll() {
